@@ -34,6 +34,12 @@ public class Coin : MonoBehaviour
         // Kiểm tra xem đối tượng va chạm có phải là Player không
         if (collision.CompareTag("Player"))
         {
+            // Phát âm thanh thu thập Coin
+            if (AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayCoinSFX();
+            }
+
             // Gọi GameManager cộng điểm
             if (GameManager.instance != null)
             {

@@ -118,6 +118,10 @@ public class PlayerController : MonoBehaviour
         if (jumpPressed && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            if (AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayJumpSFX();
+            }
         }
 
         // 4. Tự động quay mặt theo hướng di chuyển

@@ -23,6 +23,11 @@ public class UIButtonAction : MonoBehaviour
 
     private void OnClick()
     {
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayButtonClickSFX();
+        }
+
         if (GameManager.instance == null) return;
 
         if (actionType == ActionType.PlayAgain)

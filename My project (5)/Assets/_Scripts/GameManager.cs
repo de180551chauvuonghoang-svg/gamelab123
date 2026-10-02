@@ -72,6 +72,11 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("<color=red><b>[Game Over]</b> Người chơi đã thua!</color>");
 
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayGameOverSFX();
+        }
+
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
@@ -88,6 +93,11 @@ public class GameManager : MonoBehaviour
         isGameEnded = true;
 
         Debug.Log("<color=yellow><b>[You Win]</b> Chúc mừng! Bạn đã chiến thắng!</color>");
+
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayWinSFX();
+        }
 
         if (winPanel != null)
         {

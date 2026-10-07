@@ -179,6 +179,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Hàm nảy lên khi dẫm trúng đầu quái hoặc giẫm lò xo
+    public void Bounce(float force = 10f)
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, force);
+            if (AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayJumpSFX();
+            }
+        }
+    }
+
     // Hiển thị vòng tròn GroundCheck trong Scene để dễ dàng căn chỉnh bằng mắt
     private void OnDrawGizmosSelected()
     {

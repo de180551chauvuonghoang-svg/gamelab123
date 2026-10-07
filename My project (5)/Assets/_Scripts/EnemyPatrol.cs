@@ -12,8 +12,16 @@ public class EnemyPatrol : MonoBehaviour
     [Tooltip("Tốc độ di chuyển của quái")]
     public float speed = 2.5f;
 
+    [Header("--- CƠ CHẾ DẪM BẸP (STOMP) ---")]
+    [Tooltip("Lực nảy của Player khi dẫm trúng đầu quái")]
+    public float bounceForce = 11f;
+
+    [Tooltip("Điểm thưởng khi tiêu diệt quái")]
+    public int scoreReward = 5;
+
     private Transform currentTarget;
     private bool isFacingRight = true;
+    private bool isDead = false;
 
     private void Awake()
     {
@@ -45,7 +53,8 @@ public class EnemyPatrol : MonoBehaviour
 
     private void Update()
     {
-        if (currentTarget == null) return;
+        // Nếu quái đã bị dẫm chết thì dừng di chuyển
+        if (isDead || currentTarget == null) return;
 
         // Di chuyển dần dần về phía điểm đích
         transform.position = Vector2.MoveTowards(transform.position, currentTarget.position, speed * Time.deltaTime);
@@ -74,11 +83,28 @@ public class EnemyPatrol : MonoBehaviour
         transform.localScale = scale;
     }
 
-    // Khi quái chạm vào Player qua Collider
-    private void OnCollisionEnter2D(Collision2D collision)
+    // Xử lý tương tác va chạm giữa Player và Quái vật
+    private void HandlePlayerInteraction(GameObject playerObj)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (isDead) return;
+
+        PlayerController player = playerObj.GetComponent<PlayerController>();
+        Rigidbody2D playerRb = playerObj.GetComponent<Rigidbody2D>();
+
+        // Kiểm tra góc va chạm:
+        // 1. Vị trí Player cao hơn đỉnh quái (đang nhảy dẫm từ trên xuống)
+        // 2. Vận tốc Player đang rơi xuống hoặc không bay lên quá nhanh (linearVelocity.y <= 0.5f)
+        bool isAboveEnemy = playerObj.transform.position.y > transform.position.y + 0.15f;
+        bool isFallingDown = playerRb != null && playerRb.linearVelocity.y <= 0.5f;
+
+        if (isAboveEnemy && isFallingDown)
         {
+            // DẪM BẸP THÀNH CÔNG!
+            Stomp(player);
+        }
+        else
+        {
+            // Va chạm ngang sườn hoặc quái cắn từ phía sau -> Game Over
             if (GameManager.instance != null)
             {
                 GameManager.instance.GameOver();
@@ -86,15 +112,67 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
-    // Hỗ trợ cả trường hợp Collider của quái là Trigger
+    private void Stomp(PlayerController player)
+    {
+        isDead = true;
+
+        // 1. Tắt Collider ngay để quái không gây sát thương thêm
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        // 2. Cho Player nảy ngược lên không trung
+        if (player != null)
+        {
+            player.Bounce(bounceForce);
+        }
+
+        // 3. Cộng điểm thưởng tiêu diệt quái
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.AddScore(scoreReward);
+        }
+
+        // 4. Phát âm thanh nhảy / dẫm quái
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayJumpSFX();
+        }
+
+        // 5. Hiệu ứng bẹp dí: Dẹp chiều cao xuống 25%, bè rộng sang hai bên
+        Vector3 squashedScale = transform.localScale;
+        squashedScale.y *= 0.25f;
+        squashedScale.x *= 1.4f;
+        transform.localScale = squashedScale;
+
+        // Hạ nhẹ vị trí xuống sát sàn
+        transform.position = new Vector3(transform.position.x, transform.position.y - 0.12f, transform.position.z);
+
+        // Đổi màu đỏ sẫm báo hiệu quái bị bẹp
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.color = new Color(1f, 0.3f, 0.3f, 0.85f);
+        }
+
+        // 6. Tự hủy sau 0.4 giây
+        Destroy(gameObject, 0.4f);
+    }
+
+    // Khi quái chạm vào Player qua Collision
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            HandlePlayerInteraction(collision.gameObject);
+        }
+    }
+
+    // Khi quái chạm vào Player qua Trigger
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
-            if (GameManager.instance != null)
-            {
-                GameManager.instance.GameOver();
-            }
+            HandlePlayerInteraction(collision.gameObject);
         }
     }
 

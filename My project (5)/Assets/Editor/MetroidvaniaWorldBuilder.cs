@@ -27,6 +27,16 @@ public class MetroidvaniaWorldBuilder
     [MenuItem("Lab 2/🌟 Xây Dựng Thế Giới Mở Metroidvania (140m+)", false, 0)]
     public static void BuildWorldMenu()
     {
+        if (EditorApplication.isPlaying)
+        {
+            EditorUtility.DisplayDialog(
+                "Đang Trong Play Mode",
+                "Vui lòng nhấn nút Dừng Play (tắt nút ▶ màu xanh) trước khi tạo thế giới mở!\n\nSau khi tạo xong trong chế độ Editor, bạn nhấn Play (▶) để bắt đầu chơi.",
+                "Đã hiểu"
+            );
+            return;
+        }
+
         BuildEntireOpenWorld();
         EditorUtility.DisplayDialog(
             "Thế Giới Mở Đã Khởi Tạo!",
@@ -51,12 +61,16 @@ public class MetroidvaniaWorldBuilder
         GameObject oldWorld = GameObject.Find("Metroidvania_World");
         if (oldWorld != null)
         {
-            Undo.DestroyObjectImmediate(oldWorld);
+            if (EditorApplication.isPlaying) Object.Destroy(oldWorld);
+            else Undo.DestroyObjectImmediate(oldWorld);
         }
 
         // Tạo root container
         GameObject worldRoot = new GameObject("Metroidvania_World");
-        Undo.RegisterCreatedObjectUndo(worldRoot, "Build Metroidvania World");
+        if (!EditorApplication.isPlaying)
+        {
+            Undo.RegisterCreatedObjectUndo(worldRoot, "Build Metroidvania World");
+        }
 
         // 2. Setup Quest Manager & UI HUD
         SetupQuestManager();
@@ -70,8 +84,11 @@ public class MetroidvaniaWorldBuilder
         BuildZone3_Citadel(worldRoot.transform);
         BuildZone4_Peak(worldRoot.transform);
 
-        // Đánh dấu Scene đã sửa
-        EditorSceneManager.MarkSceneDirty(scene);
+        // Đánh dấu Scene đã sửa (chỉ khi không trong Play mode)
+        if (!EditorApplication.isPlaying)
+        {
+            EditorSceneManager.MarkSceneDirty(scene);
+        }
         Debug.Log("<color=#55FF55><b>[Metroidvania] Thế giới mở 140m+ đã xây dựng thành công!</b></color>");
     }
 

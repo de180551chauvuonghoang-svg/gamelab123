@@ -3538,6 +3538,8 @@ MonoBehaviour:
   pointA: {fileID: 1289588856}
   pointB: {fileID: 678212427}
   speed: 2
+  bounceForce: 11
+  scoreReward: 5
 --- !u!58 &1574493503
 CircleCollider2D:
   m_ObjectHideFlags: 0

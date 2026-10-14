@@ -65,8 +65,8 @@ Assets/
 ├── PhysicsMaterials/       # Vật liệu vật lý (ZeroFriction.physicsMaterial2D)
 ├── Prefabs/                # Các đối tượng mẫu (Coin, Enemy, Platform, Trap)
 ├── Scenes/                 # Các màn chơi
-│   ├── MainMenu.unity      (Build Index 0)
-│   └── Level01.unity       (Build Index 1)
+│   ├── MainMenu.unity      (Build Index 0 - Menu khởi động)
+│   └── SampleScene.unity   (Build Index 1 - Màn chơi chính)
 ├── Sprites/                # Hình ảnh nhân vật, quái, môi trường
 └── Tiles/                  # Tile Palettes và Tilesets
 ```
@@ -156,17 +156,16 @@ Assets/
 ## 📦 Hướng dẫn cài đặt & Build Game
 
 ### 1. Mở và chạy thử trong Unity:
-1. Mở **Unity Hub** ➜ Bấm **Open** ➜ Chọn thư mục dự án này.
-2. Mở Scene chính: `Assets/Scenes/MainMenu.unity` hoặc `Level01.unity`.
-3. Nhấn nút **Play** (`Ctrl + P`) ở giữa phía trên màn hình để trải nghiệm.
+1. Mở **Unity Hub** ➜ Bấm **Open** ➜ Chọn thư mục dự án `My project (5)`.
+2. Trên thanh menu cao nhất của Unity Editor:
+   - Chọn menu **`Lab 3`** ➜ Chọn **`Chạy Cài Đặt Tự Động Toàn Bộ Lab 3 (One-Click Setup)`**.
+3. Nhấn nút **Play (▶)** (`Ctrl + P`) để trải nghiệm toàn bộ game từ Main Menu!
 
-### 2. Xuất bản game (.exe):
-1. Vào menu **File** > **Build Settings...** (`Ctrl + Shift + B`).
-2. Kiểm tra danh sách **Scenes In Build**:
-   - `0: Assets/Scenes/MainMenu.unity`
-   - `1: Assets/Scenes/Level01.unity`
-3. Chọn mục **Target Platform**: `Windows`.
-4. Bấm **Build** ➜ Chọn thư mục lưu trữ (ví dụ: `Builds/`) ➜ Unity sẽ tạo ra file `<TênGame>.exe` hoàn chỉnh.
+### 2. Xuất bản game độc lập (.exe):
+1. Bạn có thể xuất bản tự động chỉ bằng 1 cú click:
+   - Chọn menu **`Lab 3`** ➜ Chọn **`5. Xuất Bản Game Độc Lập (.EXE Standalone Build)`**.
+2. Thư mục `Build/` sẽ được tạo ra chứa file **`GameLab3.exe`** (đã được biên dịch sẵn).
+3. Nhấp đúp chuột vào file `Build/GameLab3.exe` để trải nghiệm trực tiếp trên Windows mà không cần mở Unity!
 
 ---
 *Chúc bạn thực hiện bài Lab thành công và có một tựa game 2D Platformer hoàn chỉnh!*

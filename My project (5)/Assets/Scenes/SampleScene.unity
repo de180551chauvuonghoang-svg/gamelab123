@@ -1837,6 +1837,12 @@ MonoBehaviour:
   wallJumpForceX: 9
   wallJumpForceY: 13
   wallJumpLockTime: 0.18
+  canDoubleJump: 0
+  doubleJumpForce: 11.5
+  canAirDash: 0
+  dashSpeed: 19
+  dashDuration: 0.18
+  dashCooldown: 0.8
   squashStretchSpeed: 10
 --- !u!95 &676104631
 Animator:

@@ -212,11 +212,28 @@ public class PlayerController : MonoBehaviour
         baseScaleY = Mathf.Abs(transform.localScale.y);
     }
 
+    // Animator Parameters Cache
+    private bool hasIsRunningParam;
+    private bool hasIsJumpingParam;
+    private bool hasIsWallSlidingParam;
+    private bool hasYVelocityParam;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
+
+        if (anim != null)
+        {
+            foreach (var param in anim.parameters)
+            {
+                if (param.name == "isRunning") hasIsRunningParam = true;
+                if (param.name == "isJumping") hasIsJumpingParam = true;
+                if (param.name == "isWallSliding") hasIsWallSlidingParam = true;
+                if (param.name == "yVelocity") hasYVelocityParam = true;
+            }
+        }
     }
 
     // ========================================================================
@@ -675,12 +692,10 @@ public class PlayerController : MonoBehaviour
     {
         if (anim != null)
         {
-            anim.SetBool("isRunning", Mathf.Abs(horizontalInput) > 0.01f);
-            anim.SetBool("isJumping", !isGrounded);
-
-            // Thông số mới cho animator (nếu có)
-            anim.SetBool("isWallSliding", isWallSliding);
-            anim.SetFloat("yVelocity", rb != null ? rb.linearVelocity.y : 0f);
+            if (hasIsRunningParam) anim.SetBool("isRunning", Mathf.Abs(horizontalInput) > 0.01f);
+            if (hasIsJumpingParam) anim.SetBool("isJumping", !isGrounded);
+            if (hasIsWallSlidingParam) anim.SetBool("isWallSliding", isWallSliding);
+            if (hasYVelocityParam) anim.SetFloat("yVelocity", rb != null ? rb.linearVelocity.y : 0f);
         }
     }
 

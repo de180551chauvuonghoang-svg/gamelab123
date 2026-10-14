@@ -13,6 +13,12 @@ public class MovingPlatform : MonoBehaviour
     [Tooltip("Tốc độ di chuyển của sàn")]
     public float speed = 2.5f;
 
+    public float moveSpeed
+    {
+        get => speed;
+        set => speed = value;
+    }
+
     [Tooltip("Thời gian chờ tại mỗi điểm dừng (giây)")]
     public float waitTime = 0.5f;
 

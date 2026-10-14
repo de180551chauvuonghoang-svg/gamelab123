@@ -357,25 +357,37 @@ public class MetroidvaniaWorldBuilder
 
     private static void CreateMovingPlatform(Transform parent, string name, Vector3 startPos, Vector3 endPos, float speed)
     {
+        GameObject group = new GameObject(name + "_Group");
+        group.transform.SetParent(parent);
+
+        GameObject pA = new GameObject("PointA");
+        pA.transform.SetParent(group.transform);
+        pA.transform.position = startPos;
+
+        GameObject pB = new GameObject("PointB");
+        pB.transform.SetParent(group.transform);
+        pB.transform.position = endPos;
+
         GameObject mover = new GameObject(name);
-        mover.transform.SetParent(parent);
+        mover.transform.SetParent(group.transform);
         mover.transform.position = startPos;
 
         SpriteRenderer sr = mover.AddComponent<SpriteRenderer>();
         if (movingPlatformSprite != null) sr.sprite = movingPlatformSprite;
         else if (groundSprite != null) sr.sprite = groundSprite;
         sr.drawMode = SpriteDrawMode.Tiled;
-        sr.size = new Vector2(3f, 0.6f);
+        sr.size = new Vector2(3.5f, 0.6f);
         sr.sortingLayerName = "Player";
         sr.material = unlitMaterial;
 
         BoxCollider2D col = mover.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(3f, 0.6f);
+        col.size = new Vector2(3.5f, 0.6f);
         mover.layer = LayerMask.NameToLayer("Ground") != -1 ? LayerMask.NameToLayer("Ground") : 0;
 
         MovingPlatform mp = mover.AddComponent<MovingPlatform>();
-        mp.moveSpeed = speed;
-        mp.targetPosition = endPos;
+        mp.pointA = pA.transform;
+        mp.pointB = pB.transform;
+        mp.speed = speed;
     }
 
     private static void CreateEnemyPatrol(Transform parent, string name, Vector3 posA, Vector3 posB, float speed)

@@ -326,6 +326,14 @@ public class GameManager : MonoBehaviour
         HideComboText();
     }
 
+    private string GetHPDisplay()
+    {
+        string hearts = "";
+        for (int i = 0; i < currentHP; i++) hearts += "<color=#FF3344>[+]</color> ";
+        for (int i = currentHP; i < maxHP; i++) hearts += "<color=#555555>[-] </color>";
+        return $"HP: {hearts.TrimEnd()} ({currentHP}/{maxHP})";
+    }
+
     private void UpdateScoreUI()
     {
         if (scoreText != null)
@@ -333,10 +341,7 @@ public class GameManager : MonoBehaviour
             // Nếu không có hpText riêng, hiển thị HP cùng Score
             if (hpText == null)
             {
-                string hearts = "";
-                for (int i = 0; i < currentHP; i++) hearts += "❤";
-                for (int i = currentHP; i < maxHP; i++) hearts += "🖤";
-                scoreText.text = $"{hearts}  Score: {score}";
+                scoreText.text = $"{GetHPDisplay()}   |   Score: {score}";
             }
             else
             {
@@ -349,10 +354,7 @@ public class GameManager : MonoBehaviour
     {
         if (hpText != null)
         {
-            string hearts = "";
-            for (int i = 0; i < currentHP; i++) hearts += "❤";
-            for (int i = currentHP; i < maxHP; i++) hearts += "🖤";
-            hpText.text = hearts;
+            hpText.text = GetHPDisplay();
         }
         else
         {

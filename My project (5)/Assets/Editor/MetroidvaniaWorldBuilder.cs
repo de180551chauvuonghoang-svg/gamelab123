@@ -180,7 +180,7 @@ public class MetroidvaniaWorldBuilder
 
         // Zone trigger chuyển sang Hang Pha Lê Ngầm
         CreateZoneTrigger(zone.transform, "Trigger_Cavern", new Vector3(28f, -3f, 0), new Vector2(2f, 10f),
-            "🪨 HANG PHA LÊ NGẦM (Crystal Cavern)");
+            "[ HANG PHA LÊ NGẦM - Crystal Cavern ]");
     }
 
     // ========================================================================
@@ -232,7 +232,7 @@ public class MetroidvaniaWorldBuilder
 
         // Zone trigger chuyển sang Thành Cổ
         CreateZoneTrigger(zone.transform, "Trigger_Citadel", new Vector3(76f, 1f, 0), new Vector2(3f, 6f),
-            "🏰 THÀNH CỔ TÀN TÍCH (Citadel of Eternity)");
+            "[ THÀNH CỔ TÀN TÍCH - Citadel of Eternity ]");
     }
 
     // ========================================================================
@@ -273,7 +273,7 @@ public class MetroidvaniaWorldBuilder
 
         // Zone trigger chuyển sang Đỉnh Tháp Mây
         CreateZoneTrigger(zone.transform, "Trigger_Peak", new Vector3(107f, 11f, 0), new Vector2(3f, 8f),
-            "☁️ ĐỈNH THÁP MÂY & CỔNG PHONG ẤN (Celestial Peak)");
+            "[ ĐỈNH THÁP MÂY & CỔNG PHONG ẤN - Celestial Peak ]");
     }
 
     // ========================================================================

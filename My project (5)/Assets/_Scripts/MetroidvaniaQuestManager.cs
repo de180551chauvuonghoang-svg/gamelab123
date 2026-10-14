@@ -67,7 +67,7 @@ public class MetroidvaniaQuestManager : MonoBehaviour
     {
         EnsureUIReferences();
         UpdateGemsHUD();
-        ShowZoneBanner("🌲 ĐỒNG CỎ KHỞI NGUYÊN (Whispering Plains)");
+        ShowZoneBanner("[ ĐỒNG CỎ KHỞI NGUYÊN - Whispering Plains ]");
     }
 
     /// <summary>
@@ -189,11 +189,11 @@ public class MetroidvaniaQuestManager : MonoBehaviour
         if (gemsHudText == null) EnsureUIReferences();
         if (gemsHudText == null) return;
 
-        string em = hasEmerald ? "<color=#55FF55>🟢 Emerald</color>" : "<color=#555555>⚪ Emerald</color>";
-        string rb = hasRuby ? "<color=#FF4444>🔴 Ruby</color>" : "<color=#555555>⚪ Ruby</color>";
-        string sp = hasSapphire ? "<color=#44AAFF>🔵 Sapphire</color>" : "<color=#555555>⚪ Sapphire</color>";
+        string em = hasEmerald ? "<color=#55FF55>[Emerald: OK]</color>" : "<color=#666666>[Emerald: --]</color>";
+        string rb = hasRuby ? "<color=#FF4444>[Ruby: OK]</color>" : "<color=#666666>[Ruby: --]</color>";
+        string sp = hasSapphire ? "<color=#44AAFF>[Sapphire: OK]</color>" : "<color=#666666>[Sapphire: --]</color>";
 
-        gemsHudText.text = $"Cổ Ngọc: [ {em}  {rb}  {sp} ] ({gemCount}/3)";
+        gemsHudText.text = $"Cổ Ngọc: {em} {rb} {sp} ({gemCount}/3)";
     }
 
     // ========================================================================
@@ -206,14 +206,14 @@ public class MetroidvaniaQuestManager : MonoBehaviour
             hasDoubleJump = true;
             PlayerController pc = FindFirstObjectByType<PlayerController>();
             if (pc != null) pc.canDoubleJump = true;
-            ShowUnlockPopup("✨ KỸ NĂNG MỚI: NHẢY KÉP (DOUBLE JUMP)!", "Bạn có thể bấm [SPACE] lần thứ hai giữa không trung để nhảy cao hơn!");
+            ShowUnlockPopup("[KỸ NĂNG MỚI: NHẢY KÉP - DOUBLE JUMP]", "Bạn có thể bấm [SPACE] lần thứ hai giữa không trung để nhảy cao hơn!");
         }
         else if (abilityName == "AirDash")
         {
             hasAirDash = true;
             PlayerController pc = FindFirstObjectByType<PlayerController>();
             if (pc != null) pc.canAirDash = true;
-            ShowUnlockPopup("💨 KỸ NĂNG MỚI: LƯỚT GIÓ (AIR DASH)!", "Nhấn phím [LEFT SHIFT] để lướt cực nhanh về phía trước và né đòn hiểm!");
+            ShowUnlockPopup("[KỸ NĂNG MỚI: LƯỚT GIÓ - AIR DASH]", "Nhấn phím [LEFT SHIFT] để lướt cực nhanh về phía trước và né đòn hiểm!");
         }
     }
 
@@ -265,7 +265,7 @@ public class MetroidvaniaQuestManager : MonoBehaviour
 
     private IEnumerator AnimateLoreHint(string message)
     {
-        loreHintText.text = $"📜 {message}";
+        loreHintText.text = $"[GỢI Ý] {message}";
         Color col = new Color(1f, 0.92f, 0.5f);
 
         for (float t = 0; t < 0.3f; t += Time.deltaTime)

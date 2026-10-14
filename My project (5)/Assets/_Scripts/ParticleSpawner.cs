@@ -2,10 +2,90 @@ using UnityEngine;
 
 /// <summary>
 /// Hệ thống sinh hiệu ứng Particle hoàn toàn bằng code — không cần prefab.
-/// Gọi các hàm static từ bất kỳ script nào: ParticleSpawner.SpawnLandingDust(pos);
+/// Hỗ trợ cả 2 cách gọi:
+/// 1. Static: ParticleSpawner.SpawnLandingDust(pos);
+/// 2. Singleton: ParticleSpawner.instance.SpawnDust(pos, count, color);
 /// </summary>
-public static class ParticleSpawner
+public class ParticleSpawner : MonoBehaviour
 {
+    private static ParticleSpawner _instance;
+    public static ParticleSpawner instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = Object.FindFirstObjectByType<ParticleSpawner>();
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("ParticleSpawner");
+                    _instance = go.AddComponent<ParticleSpawner>();
+                }
+            }
+            return _instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+    }
+
+    // ========================================================================
+    // 0. BỤI TỰ CHỌN MÀU & SỐ LƯỢNG (Custom Dust / Gem / Dash)
+    // ========================================================================
+    public void SpawnDust(Vector3 position, int count = 10, Color? color = null)
+    {
+        SpawnCustomDust(position, count, color ?? new Color(0.85f, 0.8f, 0.65f, 0.7f));
+    }
+
+    public static void SpawnCustomDust(Vector3 position, int count = 10, Color? color = null)
+    {
+        Color col = color ?? new Color(0.85f, 0.8f, 0.65f, 0.7f);
+        GameObject go = new GameObject("CustomDust");
+        go.transform.position = position;
+        ParticleSystem ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.playOnAwake = false;
+        main.startLifetime = 0.45f;
+        main.startSpeed = new ParticleSystem.MinMaxCurve(1.2f, 2.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.18f);
+        main.startColor = col;
+        main.maxParticles = count * 2;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.gravityModifier = 0.2f;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 0;
+        emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)count) });
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Circle;
+        shape.radius = 0.25f;
+
+        var colorOverLife = ps.colorOverLifetime;
+        colorOverLife.enabled = true;
+        Gradient grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(col, 0f), new GradientColorKey(Color.white, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(col.a, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        colorOverLife.color = grad;
+
+        var sizeOverLife = ps.sizeOverLifetime;
+        sizeOverLife.enabled = true;
+        sizeOverLife.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0, 1, 1, 0.2f));
+
+        SetupRenderer(go);
+        ps.Play();
+        Object.Destroy(go, 1.2f);
+    }
+
     // ========================================================================
     // 1. BỤI KHI TIẾP ĐẤT (Landing Dust)
     // ========================================================================
@@ -240,7 +320,6 @@ public static class ParticleSpawner
         main.startLifetime = 0.7f;
         main.startSpeed = new ParticleSystem.MinMaxCurve(1f, 2f);
         main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.15f);
-        // Màu vàng sáng -> cam -> đỏ theo combo level
         float hue = Mathf.Clamp01(1f - comboLevel * 0.15f) * 0.15f;
         main.startColor = Color.HSVToRGB(hue, 1f, 1f);
         main.maxParticles = 10;
@@ -278,7 +357,6 @@ public static class ParticleSpawner
         var renderer = go.GetComponent<ParticleSystemRenderer>();
         if (renderer == null) return;
 
-        // Tìm shader particle phù hợp URP, fallback dần dần
         Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit")
                      ?? Shader.Find("Particles/Standard Unlit")
                      ?? Shader.Find("Sprites/Default");
@@ -286,7 +364,6 @@ public static class ParticleSpawner
         if (shader != null)
         {
             Material mat = new Material(shader);
-            // Dùng texture trắng để tô màu bằng startColor
             mat.mainTexture = Texture2D.whiteTexture;
             renderer.material = mat;
         }

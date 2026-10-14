@@ -214,6 +214,19 @@ public class GameManager : MonoBehaviour
     }
 
     // ========================================================================
+    // HỒI MÁU (HEAL)
+    // ========================================================================
+    /// <summary>
+    /// Hồi máu cho Player (ví dụ khi chạm Campfire).
+    /// </summary>
+    public void Heal(int amount = 1)
+    {
+        currentHP = Mathf.Clamp(currentHP + amount, 0, maxHP);
+        UpdateHPUI();
+        Debug.Log($"<color=green><b>[Hồi máu]</b> HP: {currentHP}/{maxHP}</color>");
+    }
+
+    // ========================================================================
     // CHECKPOINT
     // ========================================================================
     public void SetCheckpoint(Vector3 position)

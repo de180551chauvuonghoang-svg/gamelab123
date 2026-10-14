@@ -11,6 +11,9 @@ public class CameraFollow : MonoBehaviour
     public Transform target;
 
     [Header("--- SMOOTH FOLLOW ---")]
+    [Tooltip("Tốc độ bám theo chung (tương thích ngược với Lab 2 và Scene cũ)")]
+    public float smoothSpeed = 0.12f;
+
     [Tooltip("Tốc độ bám theo chiều ngang (0.05 = rất mượt, 0.3 = nhanh)")]
     public float smoothSpeedX = 0.12f;
 
@@ -45,6 +48,16 @@ public class CameraFollow : MonoBehaviour
     private float shakeDuration;
     private float shakeTimer;
     private Vector3 shakeOffset;
+
+    private void Awake()
+    {
+        // Đồng bộ nếu smoothSpeed được gán từ script bên ngoài (ví dụ Lab2Automator) hoặc Inspector cũ
+        if (Mathf.Abs(smoothSpeed - 0.12f) > 0.001f)
+        {
+            smoothSpeedX = smoothSpeed;
+            smoothSpeedY = smoothSpeed;
+        }
+    }
 
     private void LateUpdate()
     {

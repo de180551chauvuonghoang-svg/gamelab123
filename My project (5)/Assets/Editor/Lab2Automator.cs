@@ -157,6 +157,8 @@ public class Lab2Automator
                 follow.target = player.transform;
             }
             follow.smoothSpeed = 0.15f;
+            follow.smoothSpeedX = 0.15f;
+            follow.smoothSpeedY = 0.12f;
             follow.offset = new Vector3(0f, 1f, -10f);
         }
     }

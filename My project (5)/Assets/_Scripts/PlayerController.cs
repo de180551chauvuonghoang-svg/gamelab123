@@ -93,6 +93,35 @@ public class PlayerController : MonoBehaviour
     public float wallJumpLockTime = 0.18f;
 
     // ========================================================================
+    // KỸ NĂNG METROIDVANIA (DOUBLE JUMP & AIR DASH)
+    // ========================================================================
+    [Header("--- KỸ NĂNG METROIDVANIA ---")]
+    [Tooltip("Cho phép Nhảy Kép")]
+    public bool canDoubleJump = false;
+
+    [Tooltip("Lực nhảy kép")]
+    public float doubleJumpForce = 11.5f;
+
+    [Tooltip("Cho phép Lướt Gió (Air Dash)")]
+    public bool canAirDash = false;
+
+    [Tooltip("Tốc độ lướt")]
+    public float dashSpeed = 19f;
+
+    [Tooltip("Thời gian lướt (giây)")]
+    public float dashDuration = 0.18f;
+
+    [Tooltip("Thời gian hồi lướt (giây)")]
+    public float dashCooldown = 0.8f;
+
+    // Trạng thái kỹ năng
+    private bool hasDoubleJumped = false;
+    private bool isDashing = false;
+    private float dashTimeLeft = 0f;
+    private float dashCooldownTimer = 0f;
+    private float dashTrailTimer = 0f;
+
+    // ========================================================================
     // SQUASH & STRETCH (CO DÃN THỊ GIÁC)
     // ========================================================================
     [Header("--- SQUASH & STRETCH ---")]
@@ -196,7 +225,47 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // --- Đọc input ---
-        ReadInput(out float rawHorizontal, out bool jumpPressed, out bool jumpUp);
+        ReadInput(out float rawHorizontal, out bool jumpPressed, out bool jumpUp, out bool dashPressed);
+
+        // --- Hồi chiêu Lướt Gió ---
+        if (dashCooldownTimer > 0)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+
+        // --- Kích hoạt Lướt Gió (Air Dash) ---
+        if (dashPressed && canAirDash && dashCooldownTimer <= 0 && !isDashing)
+        {
+            StartDash();
+        }
+
+        // --- Xử lý khi đang Dash ---
+        if (isDashing)
+        {
+            dashTimeLeft -= Time.deltaTime;
+            dashTrailTimer -= Time.deltaTime;
+
+            if (dashTrailTimer <= 0)
+            {
+                dashTrailTimer = 0.04f;
+                if (ParticleSpawner.instance != null)
+                {
+                    ParticleSpawner.instance.SpawnDust(transform.position, 3, new Color(0.3f, 0.8f, 1f, 0.7f));
+                }
+            }
+
+            float dashDir = isFacingRight ? 1f : -1f;
+            rb.linearVelocity = new Vector2(dashDir * dashSpeed, 0f);
+            rb.gravityScale = 0f;
+
+            if (dashTimeLeft <= 0)
+            {
+                isDashing = false;
+                rb.gravityScale = baseGravityScale;
+                rb.linearVelocity = new Vector2(dashDir * moveSpeed, 0f);
+            }
+            return;
+        }
 
         // Chỉ áp dụng input ngang nếu không bị khoá bởi wall jump
         if (wallJumpLockCounter > 0)
@@ -212,6 +281,12 @@ public class PlayerController : MonoBehaviour
         if (groundCheck != null)
         {
             isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
+        }
+
+        // Reset quyền nhảy kép khi tiếp đất
+        if (isGrounded)
+        {
+            hasDoubleJumped = false;
         }
 
         // --- Kiểm tra tường (Wall Detection) ---
@@ -242,15 +317,20 @@ public class PlayerController : MonoBehaviour
         }
 
         // --- NHẢY ---
-        // Wall Jump (ưu tiên kiểm tra trước)
+        // 1. Wall Jump (ưu tiên kiểm tra trước)
         if (jumpPressed && isWallSliding)
         {
             PerformWallJump();
         }
-        // Normal Jump (Coyote Time + Jump Buffer)
+        // 2. Normal Jump (Coyote Time + Jump Buffer)
         else if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && !jumpConsumed)
         {
             PerformJump();
+        }
+        // 3. Double Jump (Nhảy kép giữa không trung)
+        else if (jumpPressed && !isGrounded && coyoteTimeCounter <= 0 && !isWallSliding && canDoubleJump && !hasDoubleJumped)
+        {
+            PerformDoubleJump();
         }
 
         // --- VARIABLE JUMP: Nhả Space sớm → cắt vận tốc lên ---
@@ -329,11 +409,12 @@ public class PlayerController : MonoBehaviour
     // ========================================================================
     // ĐỌC INPUT (Hỗ trợ cả 2 hệ thống Input)
     // ========================================================================
-    void ReadInput(out float horizontal, out bool jumpDown, out bool jumpUp)
+    void ReadInput(out float horizontal, out bool jumpDown, out bool jumpUp, out bool dashDown)
     {
         horizontal = 0f;
         jumpDown = false;
         jumpUp = false;
+        dashDown = false;
 
 #if ENABLE_INPUT_SYSTEM
         var kb = UnityEngine.InputSystem.Keyboard.current;
@@ -347,6 +428,9 @@ public class PlayerController : MonoBehaviour
 
             if (kb.spaceKey.wasReleasedThisFrame || kb.wKey.wasReleasedThisFrame || kb.upArrowKey.wasReleasedThisFrame)
                 jumpUp = true;
+
+            if (kb.leftShiftKey.wasPressedThisFrame || kb.rightShiftKey.wasPressedThisFrame || kb.cKey.wasPressedThisFrame)
+                dashDown = true;
         }
 #endif
 
@@ -359,6 +443,8 @@ public class PlayerController : MonoBehaviour
             jumpDown = true;
         if (Input.GetButtonUp("Jump"))
             jumpUp = true;
+        if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift) || Input.GetKeyDown(KeyCode.C))
+            dashDown = true;
 #endif
     }
 
@@ -387,6 +473,61 @@ public class PlayerController : MonoBehaviour
         if (AudioManager.instance != null)
         {
             AudioManager.instance.PlayJumpSFX();
+        }
+    }
+
+    // ========================================================================
+    // NHẢY KÉP (DOUBLE JUMP)
+    // ========================================================================
+    void PerformDoubleJump()
+    {
+        hasDoubleJumped = true;
+        jumpBufferCounter = 0;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, doubleJumpForce);
+
+        // Hiệu ứng stretch
+        ssX = 0.75f;
+        ssY = 1.35f;
+
+        // Bụi năng lượng nhảy kép màu lam sáng
+        if (ParticleSpawner.instance != null)
+        {
+            ParticleSpawner.instance.SpawnDust(transform.position, 16, new Color(0.3f, 1f, 0.9f));
+        }
+
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayJumpSFX();
+        }
+    }
+
+    // ========================================================================
+    // LƯỚT GIÓ (AIR DASH)
+    // ========================================================================
+    void StartDash()
+    {
+        isDashing = true;
+        dashTimeLeft = dashDuration;
+        dashCooldownTimer = dashCooldown;
+        dashTrailTimer = 0f;
+
+        // Bất tử ngắn trong lúc lướt
+        StartInvincibility(dashDuration + 0.1f);
+
+        // Co dãn thân mình
+        ssX = 1.4f;
+        ssY = 0.7f;
+
+        // Bụi lướt
+        if (ParticleSpawner.instance != null)
+        {
+            ParticleSpawner.instance.SpawnDust(transform.position, 18, new Color(0.2f, 0.7f, 1f));
+        }
+
+        CameraFollow cam = Object.FindFirstObjectByType<CameraFollow>();
+        if (cam != null)
+        {
+            cam.Shake(0.06f, 0.15f);
         }
     }
 

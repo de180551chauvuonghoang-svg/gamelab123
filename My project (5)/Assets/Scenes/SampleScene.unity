@@ -149,6 +149,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   scoreText: {fileID: 1526452415}
+  highScoreText: {fileID: 0}
+  maxHP: 3
+  hpText: {fileID: 0}
+  invincibilityDuration: 1.5
+  comboText: {fileID: 0}
   gameOverPanel: {fileID: 881103750}
   winPanel: {fileID: 1918047610}
 --- !u!4 &20629354
@@ -1136,7 +1141,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 676104635}
   smoothSpeed: 0.15
+  smoothSpeedX: 0.12
+  smoothSpeedY: 0.1
   offset: {x: 0, y: 1, z: -10}
+  lookAheadDistance: 1.8
+  lookAheadSmooth: 0.08
+  deadZoneX: 0.3
+  deadZoneY: 0.2
 --- !u!1 &560320606
 GameObject:
   m_ObjectHideFlags: 0
@@ -1806,14 +1817,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 7
+  acceleration: 55
+  deceleration: 45
   jumpForce: 7.5
+  coyoteTimeDuration: 0.12
+  jumpBufferDuration: 0.15
+  jumpCutMultiplier: 0.45
   baseGravityScale: 2.2
   fallMultiplier: 1.6
+  maxFallSpeed: -20
   groundCheck: {fileID: 1120628844}
   checkRadius: 0.15
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
+  enableWallSlide: 1
+  wallSlideSpeed: 2.5
+  wallCheckDistance: 0.4
+  wallJumpForceX: 9
+  wallJumpForceY: 13
+  wallJumpLockTime: 0.18
+  squashStretchSpeed: 10
 --- !u!95 &676104631
 Animator:
   serializedVersion: 7
@@ -3538,6 +3562,10 @@ MonoBehaviour:
   pointA: {fileID: 1289588856}
   pointB: {fileID: 678212427}
   speed: 2
+  enableChase: 1
+  detectionRange: 5
+  chaseSpeed: 4
+  loseRange: 7
   bounceForce: 11
   scoreReward: 5
 --- !u!58 &1574493503
@@ -4518,6 +4546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dddfde5295616794ab90d274ce508845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hazard
+  isInstantKill: 0
 --- !u!61 &2111031702
 BoxCollider2D:
   m_ObjectHideFlags: 0

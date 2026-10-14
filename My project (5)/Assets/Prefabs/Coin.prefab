@@ -143,3 +143,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   scoreValue: 1
   rotateSpeed: 100
+  bobAmplitude: 0.12
+  bobFrequency: 2

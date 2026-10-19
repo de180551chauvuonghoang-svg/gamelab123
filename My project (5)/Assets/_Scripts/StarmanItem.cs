@@ -49,6 +49,8 @@ public class StarmanItem : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (!isReady) return;
+
         foreach (ContactPoint2D contact in collision.contacts)
         {
             // Nảy lên khi chạm đất
@@ -73,6 +75,8 @@ public class StarmanItem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!isReady) return;
+
         if (collision.CompareTag("Player") || collision.GetComponent<PlayerController>() != null)
         {
             Collect();

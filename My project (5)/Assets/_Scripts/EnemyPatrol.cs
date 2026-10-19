@@ -243,6 +243,25 @@ public class EnemyPatrol : MonoBehaviour
     // ========================================================================
     // DẪM BẸP (STOMP) — với combo scoring
     // ========================================================================
+    /// <summary>
+    /// Tiêu diệt quái ngay lập tức (bị trúng cầu lửa, mai rùa, sao bất tử hoặc húc khối từ dưới).
+    /// </summary>
+    public void StompKill()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.AddScore(scoreReward);
+        }
+
+        StartCoroutine(SmoothDeathRoutine());
+    }
+
     private void Stomp(PlayerController player)
     {
         isDead = true;

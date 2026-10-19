@@ -49,6 +49,7 @@ public static class MarioAssetGenerator
         if (importer != null)
         {
             importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = 16;
             importer.filterMode = FilterMode.Point;
             importer.textureCompression = TextureImporterCompression.Uncompressed;

@@ -28,7 +28,44 @@ public class MarioWorld1_1Builder
     private static Sprite groundSprite;
     private static Material unlitMat;
 
-    [MenuItem("Lab 2/🍄 Xây Dựng Màn Chơi Super Mario Bros (World 1-1 Hoàn Chỉnh)", false, 1)]
+    [MenuItem("Lab 2/🍄 [KHUYÊN DÙNG] Xây Dựng Mario Vào SampleScene & Mở Chơi Ngay", false, 0)]
+    public static void BuildToSampleSceneAndOpen()
+    {
+        if (EditorApplication.isPlaying)
+        {
+            EditorUtility.DisplayDialog("Đang Chạy Play", "Vui lòng dừng Play trước khi tạo màn chơi Mario!", "OK");
+            return;
+        }
+
+        // 1. Lưu scene hiện tại nếu có chỉnh sửa
+        EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+
+        // 2. Mở SampleScene.unity
+        Scene sampleScene = EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity", OpenSceneMode.Single);
+
+        // 3. Khởi tạo lại toàn bộ Sprite chuẩn Mario
+        MarioAssetGenerator.GenerateAllMarioSprites();
+
+        // 4. Dọn dẹp/ẩn các vật thể cũ của Lab 3
+        CleanupOrHideOldLabObjects();
+
+        // 5. Xây dựng World 1-1
+        BuildWorld1_1();
+
+        // 6. Lưu scene
+        EditorSceneManager.SaveScene(sampleScene);
+
+        EditorUtility.DisplayDialog(
+            "Hoàn Tất 100%!",
+            "Đã cài đặt thành công Super Mario Bros World 1-1 vào SampleScene!\n\n" +
+            "👉 Unity hiện đang mở trực tiếp scene 'SampleScene'.\n" +
+            "👉 Bạn chỉ cần bấm nút PLAY ▶ trên thanh công cụ Unity để chơi ngay lập tức!\n\n" +
+            "Không còn bất kỳ menu Lab 3 nào che màn hình nữa!",
+            "Chơi Ngay"
+        );
+    }
+
+    [MenuItem("Lab 2/🍄 Xây Dựng Màn Chơi Mario (Vào Scene Đang Mở Hiện Tại)", false, 1)]
     public static void BuildMarioWorldMenu()
     {
         if (EditorApplication.isPlaying)
@@ -43,6 +80,14 @@ public class MarioWorld1_1Builder
 
         // Tạo trước toàn bộ sprite nếu chưa có
         MarioAssetGenerator.GenerateAllMarioSprites();
+
+        // Tự động ẩn MenuPanel nếu đang ở trong scene MainMenu để không bị che
+        GameObject menuPanel = GameObject.Find("MenuPanel");
+        if (menuPanel != null)
+        {
+            menuPanel.SetActive(false);
+            Debug.Log("<color=cyan><b>[Mario] Đã tạm thời ẩn MenuPanel trong MainMenu scene để màn hình game thông thoáng!</b></color>");
+        }
 
         BuildWorld1_1();
 
@@ -59,6 +104,26 @@ public class MarioWorld1_1Builder
             "Bấm PLAY ▶ để bắt đầu chơi!",
             "Chơi Ngay"
         );
+    }
+
+    [MenuItem("Lab 2/🍄 Bật / Tắt MenuPanel Trong Scene MainMenu", false, 2)]
+    public static void ToggleMenuPanel()
+    {
+        GameObject canvas = GameObject.Find("Canvas");
+        if (canvas != null)
+        {
+            Transform panelTrans = canvas.transform.Find("MenuPanel");
+            if (panelTrans != null)
+            {
+                bool newState = !panelTrans.gameObject.activeSelf;
+                panelTrans.gameObject.SetActive(newState);
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                Debug.Log($"<color=yellow><b>[MenuPanel] Trạng thái hiện tại: {(newState ? "HIỆN (ON)" : "ẨN (OFF - Để chơi game trực tiếp)")}</b></color>");
+                return;
+            }
+        }
+
+        EditorUtility.DisplayDialog("Thông Báo", "Không tìm thấy MenuPanel trong scene hiện tại!", "OK");
     }
 
     public static void BuildWorld1_1()
@@ -122,24 +187,97 @@ public class MarioWorld1_1Builder
         Debug.Log("<color=#55FF55><b>[Super Mario] Màn chơi World 1-1 hoàn chỉnh đã sẵn sàng!</b></color>");
     }
 
+    private static void CleanupOrHideOldLabObjects()
+    {
+        string[] oldNames = new string[] {
+            "Metroidvania_World", "Citadel_Ground_1", "Cavern_Abyss_Spikes", "Relic_DoubleJump",
+            "PointA", "Campfire_Cavern", "Chimney_Wall_L", "Zone3_Citadel", "Foreground",
+            "Citadel_Guard", "Pillar_Right", "Citadel_Tower_Fl2", "Slime_Patrol_1_Group",
+            "Wall_Test", "Trigger_Cavern", "Cavern_Stalker", "Zone4_CelestialPeak", "Grid"
+        };
+
+        GameObject backup = GameObject.Find("Old_Lab_Environment_Backup");
+        if (backup == null)
+        {
+            backup = new GameObject("Old_Lab_Environment_Backup");
+        }
+
+        foreach (string name in oldNames)
+        {
+            GameObject obj = GameObject.Find(name);
+            if (obj != null)
+            {
+                obj.transform.SetParent(backup.transform);
+            }
+        }
+
+        GameObject oldGround = GameObject.Find("Ground");
+        if (oldGround != null && oldGround.transform.parent != backup.transform && !oldGround.name.StartsWith("Ground_Part"))
+        {
+            oldGround.transform.SetParent(backup.transform);
+        }
+
+        backup.SetActive(false);
+    }
+
+    public static Sprite SafeLoadSprite(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+
+        // 1. Thử load dạng Sprite đơn
+        Sprite sp = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (sp != null) return sp;
+
+        // 2. Thử load sub-assets nếu là Sprite multiple
+        Object[] subAssets = AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
+        if (subAssets != null)
+        {
+            foreach (var sub in subAssets)
+            {
+                if (sub is Sprite s) return s;
+            }
+        }
+
+        Object[] allAssets = AssetDatabase.LoadAllAssetsAtPath(path);
+        if (allAssets != null)
+        {
+            foreach (var obj in allAssets)
+            {
+                if (obj is Sprite s) return s;
+            }
+        }
+
+        // 3. Fallback: Nếu là Texture2D, tạo Sprite trên bộ nhớ
+        Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (tex != null)
+        {
+            return Sprite.Create(
+                tex,
+                new Rect(0, 0, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f),
+                16f
+            );
+        }
+
+        return null;
+    }
+
     private static void LoadSprites()
     {
-        questionBlockSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Block_Question.png");
-        brickBlockSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Block_Brick.png");
-        emptyBlockSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Block_Empty.png");
-        goombaSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Enemy_Goomba.png");
-        koopaSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Enemy_Koopa.png");
-        koopaShellSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Enemy_KoopaShell.png");
-        pipeTopSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Pipe_Top.png");
-        pipeBodySprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Pipe_Body.png");
-        flagpoleSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Flagpole_Flag.png");
-        castleSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Mario/Castle.png");
-        coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Coin.png");
-        groundSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Ground.png");
+        questionBlockSprite = SafeLoadSprite("Assets/Sprites/Mario/Block_Question.png");
+        brickBlockSprite = SafeLoadSprite("Assets/Sprites/Mario/Block_Brick.png");
+        emptyBlockSprite = SafeLoadSprite("Assets/Sprites/Mario/Block_Empty.png");
+        goombaSprite = SafeLoadSprite("Assets/Sprites/Mario/Enemy_Goomba.png");
+        koopaSprite = SafeLoadSprite("Assets/Sprites/Mario/Enemy_Koopa.png");
+        koopaShellSprite = SafeLoadSprite("Assets/Sprites/Mario/Enemy_KoopaShell.png");
+        pipeTopSprite = SafeLoadSprite("Assets/Sprites/Mario/Pipe_Top.png");
+        pipeBodySprite = SafeLoadSprite("Assets/Sprites/Mario/Pipe_Body.png");
+        flagpoleSprite = SafeLoadSprite("Assets/Sprites/Mario/Flagpole_Flag.png");
+        castleSprite = SafeLoadSprite("Assets/Sprites/Mario/Castle.png");
+        coinSprite = SafeLoadSprite("Assets/Sprites/Coin.png") ?? SafeLoadSprite("Assets/Sprites/Mario/Block_Question.png");
+        groundSprite = SafeLoadSprite("Assets/Sprites/Ground.png");
 
-        Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit")
-                          ?? Shader.Find("Sprites/Default");
-        if (unlitShader != null) unlitMat = new Material(unlitShader);
+        unlitMat = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat");
     }
 
     private static void SetupPlayer()

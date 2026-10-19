@@ -138,6 +138,10 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isFacingRight = true;
 
+    public bool IsGrounded => isGrounded;
+    public float HorizontalInput => horizontalInput;
+    public bool IsFacingRight => isFacingRight;
+
     // Coyote Time
     private float coyoteTimeCounter;
 

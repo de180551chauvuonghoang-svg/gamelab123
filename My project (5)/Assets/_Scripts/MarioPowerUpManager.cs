@@ -245,6 +245,11 @@ public class MarioPowerUpManager : MonoBehaviour
             fireballScript.Launch(dir);
         }
 
+        if (MarioVisualController.instance != null)
+        {
+            MarioVisualController.instance.TriggerFireShootPose();
+        }
+
         if (ParticleSpawner.instance != null)
         {
             ParticleSpawner.instance.SpawnDust(spawnPos, 6, new Color(1f, 0.6f, 0.1f));

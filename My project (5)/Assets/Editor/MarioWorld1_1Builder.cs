@@ -280,6 +280,26 @@ public class MarioWorld1_1Builder
         unlitMat = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat");
     }
 
+    [MenuItem("Lab 2/🍄 Thiết Kế Lại Template Nhân Vật Mario Chuẩn (Pixel Art Đầy Đủ)", false, 3)]
+    public static void GenerateMarioCharacterMenu()
+    {
+        MarioAssetGenerator.CreateMarioCharacterSprites();
+        SetupPlayer();
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog(
+            "Thành Công!",
+            "Đã thiết kế lại toàn bộ template nhân vật Mario chuẩn Nintendo!\n\n" +
+            "Bao gồm đầy đủ các bộ sprite:\n" +
+            "• Small Mario: Đứng yên, Chạy 3 nhịp, Nhảy giơ tay đấm, Phanh gấp\n" +
+            "• Super Mario: Đứng yên, Chạy, Nhảy vươn người, Ngồi cúi (Crouch)\n" +
+            "• Fire Mario: Mũ & áo trắng, yếm đỏ, tư thế vung tay bắn lửa\n" +
+            "• Starman: Hiệu ứng cầu vồng chớp nháy siêu tốc\n" +
+            "• Đã tự động cập nhật Assets/Sprites/Player.png thành Mario\n\n" +
+            "Nhân vật Player đã được trang bị MarioVisualController để tự động chuyển động hoạt ảnh!",
+            "Tuyệt Vời"
+        );
+    }
+
     private static void SetupPlayer()
     {
         GameObject player = GameObject.Find("Player");
@@ -292,6 +312,33 @@ public class MarioWorld1_1Builder
             if (pManager == null) pManager = player.AddComponent<MarioPowerUpManager>();
             pManager.currentForm = MarioPowerUpManager.MarioForm.Small;
             pManager.isStarman = false;
+
+            // Gắn MarioVisualController để điều khiển hoạt ảnh Mario chuẩn
+            MarioVisualController vCtrl = player.GetComponent<MarioVisualController>();
+            if (vCtrl == null) vCtrl = player.AddComponent<MarioVisualController>();
+            vCtrl.LoadDefaultMarioSprites();
+
+            // Tắt Animator controller cũ nếu có
+            Animator anim = player.GetComponent<Animator>();
+            if (anim != null) anim.enabled = false;
+
+            // Cập nhật SpriteRenderer ngay lập tức sang Mario Small Idle
+            SpriteRenderer sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Sprite marioIdle = SafeLoadSprite("Assets/Sprites/Mario/Mario_Small_Idle.png");
+                if (marioIdle != null) sr.sprite = marioIdle;
+                sr.sortingLayerName = "Player";
+                sr.sortingOrder = 10;
+            }
+
+            // BoxCollider2D vừa khít với Mario Small (1m x 1m chuẩn)
+            BoxCollider2D col = player.GetComponent<BoxCollider2D>();
+            if (col != null)
+            {
+                col.size = new Vector2(0.75f, 0.95f);
+                col.offset = new Vector2(0f, 0.05f);
+            }
 
             PlayerController pc = player.GetComponent<PlayerController>();
             if (pc != null)

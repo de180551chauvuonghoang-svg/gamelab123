@@ -33,12 +33,13 @@ public static class MarioAssetGenerator
         CreateFlagpole();
         CreateCastle();
         CreateFireball();
+        CreateMarioCharacterSprites();
 
         AssetDatabase.Refresh();
-        Debug.Log("<color=#FFCC00><b>[Mario] Toàn bộ 14 Sprite pixel art Mario đã được khởi tạo thành công!</b></color>");
+        Debug.Log("<color=#FFCC00><b>[Mario] Toàn bộ Sprite đồ họa nhân vật Mario & Màn chơi đã được khởi tạo chuẩn phong cách pixel art!</b></color>");
     }
 
-    private static void SaveTexture(Texture2D tex, string fileName)
+    public static void SaveTexture(Texture2D tex, string fileName, int ppu = 16)
     {
         byte[] bytes = tex.EncodeToPNG();
         string fullPath = Path.Combine(FOLDER, fileName);
@@ -50,7 +51,25 @@ public static class MarioAssetGenerator
         {
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
-            importer.spritePixelsPerUnit = 16;
+            importer.spritePixelsPerUnit = ppu;
+            importer.filterMode = FilterMode.Point;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport();
+        }
+    }
+
+    public static void SaveTextureToPath(Texture2D tex, string fullPath, int ppu = 16)
+    {
+        byte[] bytes = tex.EncodeToPNG();
+        File.WriteAllBytes(fullPath, bytes);
+
+        AssetDatabase.ImportAsset(fullPath, ImportAssetOptions.ForceUpdate);
+        TextureImporter importer = AssetImporter.GetAtPath(fullPath) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = ppu;
             importer.filterMode = FilterMode.Point;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.SaveAndReimport();
@@ -627,5 +646,456 @@ public static class MarioAssetGenerator
         tex.Apply();
         SaveTexture(tex, "Fireball.png");
     }
+
+    // ========================================================================
+    // ĐỒ HỌA NHÂN VẬT MARIO CHUẨN NINTENDO (SMALL, SUPER, FIRE)
+    // ========================================================================
+    public static void CreateMarioCharacterSprites()
+    {
+        ColorScheme normal = new ColorScheme();
+        ColorScheme fire = new FireMarioColorScheme();
+
+        // 1. SMALL MARIO (16x16)
+        string[] smallIdle = new string[] {
+            "....RRRRR.......",
+            "...RRRRRRRRR....",
+            "...DDDSSKS......",
+            "..DSDSSSKSSS....",
+            "..DSDDSSSSSS....",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            "...RRBRR........",
+            "..RRRBRRBRR.....",
+            ".RRRRBBBBRRR....",
+            ".WW.BYBBY.WW....",
+            ".WW.BBBBBBWW....",
+            "...BBBBBBBB.....",
+            "...BBB..BBB.....",
+            "..DDD....DDD....",
+            ".DDDD....DDDD..."
+        };
+
+        string[] smallRun1 = new string[] {
+            "....RRRRR.......",
+            "...RRRRRRRRR....",
+            "...DDDSSKS......",
+            "..DSDSSSKSSS....",
+            "..DSDDSSSSSS....",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            "..W.RRBRR.......",
+            ".WW.RRBRR.WW....",
+            "....RBBBBRWW....",
+            "....BBBBBB......",
+            "...BBBBBB.......",
+            "..BBBB.BB.......",
+            ".DDD....BBB.....",
+            "DDDD.....DDD....",
+            ".........DDDD..."
+        };
+
+        string[] smallRun2 = new string[] {
+            "....RRRRR.......",
+            "...RRRRRRRRR....",
+            "...DDDSSKS......",
+            "..DSDSSSKSSS....",
+            "..DSDDSSSSSS....",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            "...RRBRR........",
+            "..RRRBRRBRR.....",
+            ".RRRRBBBBRRR....",
+            ".WW.BYBBY.WW....",
+            ".WW.BBBBBBWW....",
+            "...BBBBBB.......",
+            "...BB..BB.......",
+            "..DDD..DDD......",
+            ".DDDD..DDDD....."
+        };
+
+        string[] smallRun3 = new string[] {
+            "....RRRRR.......",
+            "...RRRRRRRRR....",
+            "...DDDSSKS......",
+            "..DSDSSSKSSS....",
+            "..DSDDSSSSSS....",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            "....RRBRR.W.....",
+            ".WW.RRBRR.WW....",
+            ".WWRBBBBR.......",
+            "...BBBBBB.......",
+            "....BBBBBB......",
+            "....BB.BBBB.....",
+            "....BBB...DDD...",
+            "...DDD....DDDD..",
+            "..DDDD.........."
+        };
+
+        string[] smallJump = new string[] {
+            "..........WW....",
+            "....RRRRR.WW....",
+            "...RRRRRRRRR....",
+            "...DDDSSKS.R....",
+            "..DSDSSSKSSRR...",
+            "..DSDDSSSSSRR...",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            ".WW.RRBRRRR.....",
+            ".WW.RBBBRRR.....",
+            "...RRBBBBB......",
+            "...BBBBBBBBB....",
+            "...BBB.BBBBB....",
+            "..DDD...DDDD....",
+            ".DDDD....DDD....",
+            "..........DD...."
+        };
+
+        string[] smallSkid = new string[] {
+            "....RRRRR.......",
+            "...RRRRRRRRR....",
+            "...DDDSSKS......",
+            "..DSDSSSKSSS....",
+            "..DSDDSSSSSS....",
+            "..DDSSSSDDDD....",
+            "....SSSSSSS.....",
+            "...RRBRR........",
+            ".WW.RBBBR.WW....",
+            ".WW.BBBBB.WW....",
+            "....BBBBB.......",
+            "...BBBBBBB......",
+            "..BBB...BBB.....",
+            ".DDD.....DDD....",
+            "DDDD.....DDDD...",
+            ".DDD.....DDD...."
+        };
+
+        Texture2D sIdleTex = CreateFromAscii(smallIdle, 16, 16, normal);
+        SaveTexture(sIdleTex, "Mario_Small_Idle.png", 16);
+        SaveTexture(CreateFromAscii(smallRun1, 16, 16, normal), "Mario_Small_Run1.png", 16);
+        SaveTexture(CreateFromAscii(smallRun2, 16, 16, normal), "Mario_Small_Run2.png", 16);
+        SaveTexture(CreateFromAscii(smallRun3, 16, 16, normal), "Mario_Small_Run3.png", 16);
+        SaveTexture(CreateFromAscii(smallJump, 16, 16, normal), "Mario_Small_Jump.png", 16);
+        SaveTexture(CreateFromAscii(smallSkid, 16, 16, normal), "Mario_Small_Skid.png", 16);
+
+        // Lưu bản copy đè thẳng vào Assets/Sprites/Player.png (để sprite mặc định là Mario!)
+        SaveTextureToPath(sIdleTex, "Assets/Sprites/Player.png", 16);
+
+        // 2. SUPER MARIO (16x32)
+        string[] superIdle = new string[] {
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "...RRRRBRRRR....",
+            "...RRRRBRRRR....",
+            "..RRRRRBRRRRR...",
+            "..RRRRBBBBRRR...",
+            ".WW.RBBBBBBR.WW.",
+            ".WW.RBYBBYBR.WW.",
+            ".WW.RBBBBBBR.WW.",
+            ".WW.RBBBBBBR.WW.",
+            "....BBBBBBBB....",
+            "....BBBBBBBB....",
+            "...BBBBBBBBBB...",
+            "...BBBBBBBBBB...",
+            "...BBB....BBB...",
+            "...BBB....BBB...",
+            "...BBB....BBB...",
+            "..DDDD....DDDD..",
+            "..DDDD....DDDD..",
+            ".DDDDD....DDDDD.",
+            ".DDDDD....DDDDD."
+        };
+
+        string[] superRun1 = new string[] {
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "..W.RRRRBRRR....",
+            ".WW.RRRRBRRRR...",
+            ".WW.RRRRBRRRRWW.",
+            "....RRRRBBBBRWW.",
+            "....RBBBBBBB....",
+            "....RBYBBYBR....",
+            "....RBBBBBBR....",
+            "....BBBBBBBB....",
+            "...BBBBBBBB.....",
+            "..BBBBBBBBB.....",
+            "..BBBB.BBBB.....",
+            ".DDDD...BBBB....",
+            ".DDDD....BBBB...",
+            "DDDDD.....BBB...",
+            ".DDDD......DDD..",
+            "..........DDDD..",
+            ".........DDDDD..",
+            ".........DDDDD..",
+            "..........DDDD.."
+        };
+
+        string[] superRun2 = new string[] {
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "...RRRRBRRRR....",
+            "...RRRRBRRRR....",
+            "..RRRRRBRRRRR...",
+            "..RRRRBBBBRRR...",
+            ".WW.RBBBBBBR.WW.",
+            ".WW.RBYBBYBR.WW.",
+            ".WW.RBBBBBBR.WW.",
+            "....BBBBBBBB....",
+            "....BBBBBBBB....",
+            "...BBBBBBBB.....",
+            "...BBBB.BBB.....",
+            "...BBB..BBB.....",
+            "...BBB..BBB.....",
+            "..DDDD..DDDD....",
+            "..DDDD..DDDD....",
+            ".DDDDD..DDDDD...",
+            ".DDDDD..DDDDD...",
+            ".DDDDD..DDDDD...",
+            "..DDDD...DDDD..."
+        };
+
+        string[] superRun3 = new string[] {
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "....RRRRBRRR.W..",
+            "...RRRRRBRRR.WW.",
+            ".WW.RRRRBRRR.WW.",
+            ".WWRRRRRBBBBR...",
+            "....RBBBBBBB....",
+            "....RBYBBYBR....",
+            "....RBBBBBBR....",
+            "....BBBBBBBB....",
+            ".....BBBBBBBB...",
+            ".....BBBBBBBBB..",
+            ".....BBBB.BBBB..",
+            "....BBBB...DDDD.",
+            "...BBBB....DDDD.",
+            "...BBB.....DDDDD",
+            "..DDD......DDDD.",
+            "..DDDD..........",
+            ".DDDDD..........",
+            ".DDDDD..........",
+            "..DDDD.........."
+        };
+
+        string[] superJump = new string[] {
+            "...........WW...",
+            ".....RRRRR.WW...",
+            "....RRRRRR.WW...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.R...",
+            "...DSDSSSKSSRR..",
+            "...DSDSSSKSSRR..",
+            "...DSDDSSSSSSRR.",
+            "...DDSSSSDDDD.R.",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRRR....",
+            "..W.RRRRBRRRR...",
+            ".WW.RRRRBRRRRR..",
+            ".WW.RRRRBBBBRRR.",
+            ".WW.RBBBBBBB.WW.",
+            "....RBBBBBBB....",
+            "...RRBBBBBBB....",
+            "...RRBBBBBBB....",
+            "...BBBBBBBBB....",
+            "...BBBBBBBBB....",
+            "...BBBBBBBBB....",
+            "...BBBB.BBBBB...",
+            "...BBB..BBBBB...",
+            "..DDDD...BBBB...",
+            ".DDDDD....DDDD..",
+            ".DDDDD....DDDD..",
+            "..DDD.....DDDD..",
+            "...........DDD..",
+            "...........DDD..",
+            "..........DDDD.."
+        };
+
+        string[] superCrouch = new string[] {
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "...RRRRBBBBRR...",
+            "..WW.RBBBBBBRWW.",
+            "..WW.BBBBBBBBWW.",
+            "...BBBBBBBBBB...",
+            "...BBBBBBBBBB...",
+            "..BBBBBBBBBBBB..",
+            "..BBBBBBBBBBBB..",
+            "..BBBB....BBBB..",
+            ".DDDDD....DDDDD.",
+            ".DDDDD....DDDDD.",
+            ".DDDDD....DDDDD.",
+            ".DDDD......DDDD.",
+            ".DDDD......DDDD."
+        };
+
+        SaveTexture(CreateFromAscii(superIdle, 16, 32, normal), "Mario_Super_Idle.png", 16);
+        SaveTexture(CreateFromAscii(superRun1, 16, 32, normal), "Mario_Super_Run1.png", 16);
+        SaveTexture(CreateFromAscii(superRun2, 16, 32, normal), "Mario_Super_Run2.png", 16);
+        SaveTexture(CreateFromAscii(superRun3, 16, 32, normal), "Mario_Super_Run3.png", 16);
+        SaveTexture(CreateFromAscii(superJump, 16, 32, normal), "Mario_Super_Jump.png", 16);
+        SaveTexture(CreateFromAscii(superCrouch, 16, 32, normal), "Mario_Super_Crouch.png", 16);
+
+        // 3. FIRE MARIO (16x32 Áo Trắng Yếm Đỏ)
+        string[] fireShoot = new string[] {
+            ".....RRRRR......",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....RRRRRRRRR...",
+            "....DDDSSKS.....",
+            "...DSDSSSKSSS...",
+            "...DSDSSSKSSS...",
+            "...DSDDSSSSSS...",
+            "...DDSSSSDDDD...",
+            "...DDSSSSDDDD...",
+            ".....SSSSSSS....",
+            ".....SSSSSSS....",
+            "....RRRBRRR.....",
+            "...RRRRBRRRR....",
+            "..RRRRRBRRRRRWW.",
+            ".WW.RRRBBBBRRRWW",
+            ".WW.RBBBBBBR.WW.",
+            "....RBBBBBBR....",
+            "....RBYBBYBR....",
+            "....RBBBBBBR....",
+            "....BBBBBBBB....",
+            "....BBBBBBBB....",
+            "...BBBBBBBBBB...",
+            "...BBBBBBBBBB...",
+            "...BBB....BBB...",
+            "...BBB....BBB...",
+            "...BBB....BBB...",
+            "..DDDD....DDDD..",
+            "..DDDD....DDDD..",
+            "..DDDD....DDDD..",
+            ".DDDDD....DDDDD.",
+            ".DDDDD....DDDDD."
+        };
+
+        SaveTexture(CreateFromAscii(superIdle, 16, 32, fire), "Mario_Fire_Idle.png", 16);
+        SaveTexture(CreateFromAscii(superRun1, 16, 32, fire), "Mario_Fire_Run1.png", 16);
+        SaveTexture(CreateFromAscii(superRun2, 16, 32, fire), "Mario_Fire_Run2.png", 16);
+        SaveTexture(CreateFromAscii(superRun3, 16, 32, fire), "Mario_Fire_Run3.png", 16);
+        SaveTexture(CreateFromAscii(superJump, 16, 32, fire), "Mario_Fire_Jump.png", 16);
+        SaveTexture(CreateFromAscii(fireShoot, 16, 32, fire), "Mario_Fire_Shoot.png", 16);
+    }
+
+    private static Texture2D CreateFromAscii(string[] rows, int width, int height, ColorScheme scheme)
+    {
+        Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        for (int y = 0; y < height; y++)
+        {
+            int rowIdx = height - 1 - y; // Hàng 0 trên cùng trong mảng string
+            string row = (rowIdx >= 0 && rowIdx < rows.Length) ? rows[rowIdx] : "";
+            for (int x = 0; x < width; x++)
+            {
+                char c = (x < row.Length) ? row[x] : '.';
+                tex.SetPixel(x, y, scheme.GetColor(c));
+            }
+        }
+        tex.Apply();
+        return tex;
+    }
+
+    public class ColorScheme
+    {
+        public Color red = new Color(0.88f, 0.12f, 0.08f);       // Đỏ mũ & áo Mario
+        public Color blue = new Color(0.04f, 0.22f, 0.82f);      // Xanh dương quần yếm
+        public Color skin = new Color(0.99f, 0.82f, 0.62f);      // Màu da hồng hào
+        public Color darkBrown = new Color(0.38f, 0.18f, 0.05f);  // Nâu sẫm tóc & giày
+        public Color white = Color.white;                        // Trắng găng tay
+        public Color yellow = new Color(1f, 0.88f, 0.1f);        // Vàng cúc quần
+        public Color black = new Color(0.08f, 0.08f, 0.08f);      // Đen mắt & ria
+
+        public virtual Color GetColor(char c)
+        {
+            switch (c)
+            {
+                case 'R': return red;
+                case 'B': return blue;
+                case 'S': return skin;
+                case 'D': return darkBrown;
+                case 'W': return white;
+                case 'Y': return yellow;
+                case 'K': return black;
+                default: return Color.clear;
+            }
+        }
+    }
+
+    public class FireMarioColorScheme : ColorScheme
+    {
+        public override Color GetColor(char c)
+        {
+            // Mario Lửa: Mũ trắng + Áo trắng, Quần yếm đỏ
+            if (c == 'R') return white;
+            if (c == 'B') return red;
+            return base.GetColor(c);
+        }
+    }
 }
 #endif
+

@@ -41,8 +41,16 @@ public class Hazard : MonoBehaviour
                 }
                 else
                 {
-                    // Bẫy thường: trừ 1 HP
-                    GameManager.instance.TakeDamage();
+                    // Mario trúng bẫy: teo nhỏ trước khi mất mạng
+                    if (MarioPowerUpManager.instance != null)
+                    {
+                        bool survived = MarioPowerUpManager.instance.TakeHit();
+                        if (!survived) GameManager.instance.TakeDamage();
+                    }
+                    else
+                    {
+                        GameManager.instance.TakeDamage();
+                    }
                 }
             }
         }
@@ -64,7 +72,15 @@ public class Hazard : MonoBehaviour
                 }
                 else
                 {
-                    GameManager.instance.TakeDamage();
+                    if (MarioPowerUpManager.instance != null)
+                    {
+                        bool survived = MarioPowerUpManager.instance.TakeHit();
+                        if (!survived) GameManager.instance.TakeDamage();
+                    }
+                    else
+                    {
+                        GameManager.instance.TakeDamage();
+                    }
                 }
             }
         }

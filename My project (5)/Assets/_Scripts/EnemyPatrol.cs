@@ -217,8 +217,23 @@ public class EnemyPatrol : MonoBehaviour
         }
         else
         {
-            // Va chạm ngang → mất máu (TakeDamage thay vì GameOver trực tiếp)
-            if (GameManager.instance != null)
+            // Nếu Mario đang trong trạng thái Sao Bất Tử (Starman)
+            if (MarioPowerUpManager.instance != null && MarioPowerUpManager.instance.isStarman)
+            {
+                StompKill();
+                return;
+            }
+
+            // Va chạm ngang → Mario teo nhỏ hoặc mất máu
+            if (MarioPowerUpManager.instance != null)
+            {
+                bool survived = MarioPowerUpManager.instance.TakeHit();
+                if (!survived && GameManager.instance != null)
+                {
+                    GameManager.instance.TakeDamage();
+                }
+            }
+            else if (GameManager.instance != null)
             {
                 GameManager.instance.TakeDamage();
             }

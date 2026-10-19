@@ -210,6 +210,12 @@ public class PlayerController : MonoBehaviour
         // Lưu scale gốc cho squash & stretch
         baseScaleX = Mathf.Abs(transform.localScale.x);
         baseScaleY = Mathf.Abs(transform.localScale.y);
+
+        // Tự động gắn MarioPowerUpManager
+        if (GetComponent<MarioPowerUpManager>() == null)
+        {
+            gameObject.AddComponent<MarioPowerUpManager>();
+        }
     }
 
     // Animator Parameters Cache

@@ -26,6 +26,10 @@ public class MarioWorld1_1Builder
     private static Sprite castleSprite;
     private static Sprite coinSprite;
     private static Sprite groundSprite;
+    private static Sprite cloudSprite;
+    private static Sprite bushSprite;
+    private static Sprite hillLargeSprite;
+    private static Sprite hillSmallSprite;
     private static Material unlitMat;
 
     [MenuItem("Lab 2/🍄 [KHUYÊN DÙNG] Xây Dựng Mario Vào SampleScene & Mở Chơi Ngay", false, 0)]
@@ -128,6 +132,9 @@ public class MarioWorld1_1Builder
 
     public static void BuildWorld1_1()
     {
+        // 0. Dọn dẹp/ẩn sạch sẽ toàn bộ các vật thể cũ của Lab 2 (spikes, slime, tilemap xám, score text, v.v.)
+        CleanupOrHideOldLabObjects();
+
         LoadSprites();
 
         Scene scene = SceneManager.GetActiveScene();
@@ -148,7 +155,7 @@ public class MarioWorld1_1Builder
         GameObject worldRoot = new GameObject("Mario_World_1_1");
         Undo.RegisterCreatedObjectUndo(worldRoot, "Build Mario World");
 
-        // 2. Chuyển Camera sang màu trời xanh Mario kinh điển
+        // 2. Chuyển Camera sang màu trời xanh Mario kinh điển (#5C94FC)
         Camera mainCam = Camera.main;
         if (mainCam != null)
         {
@@ -168,32 +175,43 @@ public class MarioWorld1_1Builder
         // 4. Setup Mario HUD Manager
         SetupMarioHUD();
 
-        // 5. Xây dựng địa hình
+        // 5. Xây dựng cảnh nền Parallax (Mây trời, Đồi xanh, Bụi cỏ Mario)
+        BuildBackgroundScenery(worldRoot.transform);
+
+        // 6. Xây dựng địa hình sàn đất Mario mới (Đất ấm + Cỏ xanh rì)
         BuildGroundAndPits(worldRoot.transform);
 
-        // 6. Xây dựng Khối gạch & Khối chấm hỏi
+        // 7. Xây dựng Khối gạch & Khối chấm hỏi
         BuildBlocksAndItems(worldRoot.transform);
 
-        // 7. Xây dựng các ống nước & hầm bí mật
+        // 8. Xây dựng các ống nước & hầm bí mật
         BuildPipesAndUnderground(worldRoot.transform);
 
-        // 8. Bố trí kẻ địch Goomba & Koopa
+        // 9. Bố trí kẻ địch Goomba & Koopa
         BuildEnemies(worldRoot.transform);
 
-        // 9. Xây dựng Bậc thang, Cột cờ & Lâu đài chiến thắng
+        // 10. Xây dựng Bậc thang, Cột cờ & Lâu đài chiến thắng
         BuildFlagpoleAndCastle(worldRoot.transform);
 
         EditorSceneManager.MarkSceneDirty(scene);
-        Debug.Log("<color=#55FF55><b>[Super Mario] Màn chơi World 1-1 hoàn chỉnh đã sẵn sàng!</b></color>");
+        Debug.Log("<color=#55FF55><b>[Super Mario] Màn chơi World 1-1 hoàn chỉnh với phong cách Mario mới đã sẵn sàng!</b></color>");
     }
 
     private static void CleanupOrHideOldLabObjects()
     {
         string[] oldNames = new string[] {
             "Metroidvania_World", "Citadel_Ground_1", "Cavern_Abyss_Spikes", "Relic_DoubleJump",
-            "PointA", "Campfire_Cavern", "Chimney_Wall_L", "Zone3_Citadel", "Foreground",
-            "Citadel_Guard", "Pillar_Right", "Citadel_Tower_Fl2", "Slime_Patrol_1_Group",
-            "Wall_Test", "Trigger_Cavern", "Cavern_Stalker", "Zone4_CelestialPeak", "Grid"
+            "PointA", "Campfire_Cavern", "Chimney_Wall_L", "Chimney_Wall_R", "Zone3_Citadel", "Foreground",
+            "Citadel_Guard", "Citadel_Guard_Group", "Pillar_Right", "Pillar_Left", "Citadel_Tower_Fl1", "Citadel_Tower_Fl2",
+            "Slime_Patrol_1_Group", "Slime_Patrol_1", "Wall_Test", "Trigger_Cavern", "Trigger_Citadel", "Trigger_Peak",
+            "Cavern_Stalker", "Cavern_Stalker_Group", "Zone4_CelestialPeak", "Grid", "Ground_Tilemap", "Plains_Ground",
+            "Spike_Plains", "Trap_Spikes", "Spikes_Citadel", "Enemy", "Enemy_Patrol_Group", "Cavern_Mover", "Cavern_Mover_Group",
+            "The_Ancient_Gate", "Campfire_Peak", "Campfire_Plains", "Campfire_Citadel", "Totem_Start", "Totem_Cavern", "Totem_Citadel",
+            "Totem_Gate", "Emerald_Pillar", "Sky_Island_1", "Sky_Island_2", "Sky_Island_3", "Sky_Island_4", "Arch_Top",
+            "Gem_Sapphire", "Gem_Ruby", "Gem_Emerald", "Ruby_Altar", "Sapphire_Altar", "Relic_Altar_DJ", "Relic_Altar_Dash",
+            "Relic_AirDash", "Key_WinItem", "Cavern_Ceiling", "Cavern_Floor_1", "Cavern_Floor_2", "Temple_Plaza", "Shaft_LeftWall",
+            "Shaft_RightWall", "MovingPlatform", "Moving_Platform_Group", "Zone1_WhisperingPlains", "Zone2_CrystalCavern",
+            "LeftBoundaryWall", "Ground", "Coin"
         };
 
         GameObject backup = GameObject.Find("Old_Lab_Environment_Backup");
@@ -202,21 +220,38 @@ public class MarioWorld1_1Builder
             backup = new GameObject("Old_Lab_Environment_Backup");
         }
 
-        foreach (string name in oldNames)
+        GameObject[] allSceneObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var obj in allSceneObjects)
         {
-            GameObject obj = GameObject.Find(name);
-            if (obj != null)
+            if (obj == null || obj == backup) continue;
+
+            // Kiểm tra theo danh sách tên hoặc tiền tố
+            bool match = false;
+            foreach (string name in oldNames)
             {
+                if (obj.name == name) { match = true; break; }
+            }
+            if (obj.name.StartsWith("Enemy_") && obj.name != "Enemy_Goomba" && obj.name != "Enemy_Koopa") match = true;
+
+            if (match)
+            {
+                if (obj.transform.IsChildOf(backup.transform)) continue;
+                GameObject marioWorld = GameObject.Find("Mario_World_1_1");
+                if (marioWorld != null && obj.transform.IsChildOf(marioWorld.transform)) continue;
+                if (obj.name == "Player" || obj.name == "Main Camera" || obj.name == "MarioGameManager" || obj.name == "AudioManager") continue;
+
                 obj.transform.SetParent(backup.transform);
             }
         }
 
-        GameObject oldGround = GameObject.Find("Ground");
-        if (oldGround != null && oldGround.transform.parent != backup.transform && !oldGround.name.StartsWith("Ground_Part"))
+        // Ẩn chữ ScoreText cũ của Lab 2 trong Canvas để nhường chỗ cho HUD Mario
+        GameObject scoreText = GameObject.Find("ScoreText");
+        if (scoreText != null)
         {
-            oldGround.transform.SetParent(backup.transform);
+            scoreText.SetActive(false);
         }
 
+        // Tắt toàn bộ môi trường cũ để không che hay va chạm với Mario
         backup.SetActive(false);
     }
 
@@ -275,7 +310,11 @@ public class MarioWorld1_1Builder
         flagpoleSprite = SafeLoadSprite("Assets/Sprites/Mario/Flagpole_Flag.png");
         castleSprite = SafeLoadSprite("Assets/Sprites/Mario/Castle.png");
         coinSprite = SafeLoadSprite("Assets/Sprites/Coin.png") ?? SafeLoadSprite("Assets/Sprites/Mario/Block_Question.png");
-        groundSprite = SafeLoadSprite("Assets/Sprites/Ground.png");
+        groundSprite = SafeLoadSprite("Assets/Sprites/Mario/Mario_Ground.png") ?? SafeLoadSprite("Assets/Sprites/Ground.png");
+        cloudSprite = SafeLoadSprite("Assets/Sprites/Mario/Mario_Cloud.png");
+        bushSprite = SafeLoadSprite("Assets/Sprites/Mario/Mario_Bush.png");
+        hillLargeSprite = SafeLoadSprite("Assets/Sprites/Mario/Mario_Hill_Large.png");
+        hillSmallSprite = SafeLoadSprite("Assets/Sprites/Mario/Mario_Hill_Small.png");
 
         unlitMat = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat");
     }
@@ -362,6 +401,111 @@ public class MarioWorld1_1Builder
         mgm.lives = 3;
         mgm.timeRemaining = 400f;
         mgm.worldName = "1-1";
+
+        // Tắt ScoreText cũ của Lab 2
+        GameObject oldScore = GameObject.Find("ScoreText");
+        if (oldScore != null) oldScore.SetActive(false);
+    }
+
+    // ========================================================================
+    // CẢNH NỀN PARALLAX (MÂY TRỜI, ĐỒI XANH, BỤI CÂY MARIO ĐẸP MẮT)
+    // ========================================================================
+    private static void BuildBackgroundScenery(Transform parent)
+    {
+        GameObject sceneryRoot = new GameObject("Background_Scenery");
+        sceneryRoot.transform.SetParent(parent);
+
+        // --- 1. LỚP ĐỒI XANH PHÍA XA (PARALLAX HILLS) ---
+        GameObject hillsGroup = new GameObject("Scenery_Hills");
+        hillsGroup.transform.SetParent(sceneryRoot.transform);
+        ParallaxBackground hillParallax = hillsGroup.AddComponent<ParallaxBackground>();
+        hillParallax.parallaxEffectMultiplier = new Vector2(0.25f, 0.05f);
+        hillParallax.autoScrollSpeedX = 0f;
+
+        float[] largeHillX = new float[] { -2f, 22f, 48f, 72f, 96f };
+        foreach (float hx in largeHillX)
+        {
+            if (hillLargeSprite != null)
+            {
+                GameObject h = new GameObject($"Hill_Large_{hx}");
+                h.transform.SetParent(hillsGroup.transform);
+                h.transform.position = new Vector3(hx, -1.1f, 0);
+                SpriteRenderer sr = h.AddComponent<SpriteRenderer>();
+                sr.sprite = hillLargeSprite;
+                sr.sortingLayerName = "Default";
+                sr.sortingOrder = -30;
+                h.transform.localScale = new Vector3(2.5f, 2.5f, 1f);
+            }
+        }
+
+        float[] smallHillX = new float[] { 9f, 34f, 60f, 84f };
+        foreach (float sx in smallHillX)
+        {
+            if (hillSmallSprite != null)
+            {
+                GameObject h = new GameObject($"Hill_Small_{sx}");
+                h.transform.SetParent(hillsGroup.transform);
+                h.transform.position = new Vector3(sx, -1.75f, 0);
+                SpriteRenderer sr = h.AddComponent<SpriteRenderer>();
+                sr.sprite = hillSmallSprite;
+                sr.sortingLayerName = "Default";
+                sr.sortingOrder = -31;
+                h.transform.localScale = new Vector3(2.0f, 2.0f, 1f);
+            }
+        }
+
+        // --- 2. LỚP MÂY TRỜI LỮNG LỜ TRÔI (PARALLAX CLOUDS) ---
+        GameObject cloudsGroup = new GameObject("Scenery_Clouds");
+        cloudsGroup.transform.SetParent(sceneryRoot.transform);
+        ParallaxBackground cloudParallax = cloudsGroup.AddComponent<ParallaxBackground>();
+        cloudParallax.parallaxEffectMultiplier = new Vector2(0.12f, 0.02f);
+        cloudParallax.autoScrollSpeedX = 0.25f; // Tự động trôi nhẹ 0.25m/s
+
+        Vector3[] cloudPositions = new Vector3[] {
+            new Vector3(3f, 4.2f, 0),
+            new Vector3(17f, 5.0f, 0),
+            new Vector3(31f, 3.8f, 0),
+            new Vector3(45f, 4.6f, 0),
+            new Vector3(59f, 4.0f, 0),
+            new Vector3(73f, 5.2f, 0),
+            new Vector3(87f, 4.3f, 0),
+            new Vector3(101f, 4.7f, 0)
+        };
+
+        for (int i = 0; i < cloudPositions.Length; i++)
+        {
+            if (cloudSprite != null)
+            {
+                GameObject c = new GameObject($"Cloud_{i}");
+                c.transform.SetParent(cloudsGroup.transform);
+                c.transform.position = cloudPositions[i];
+                SpriteRenderer sr = c.AddComponent<SpriteRenderer>();
+                sr.sprite = cloudSprite;
+                sr.sortingLayerName = "Default";
+                sr.sortingOrder = -40;
+                c.transform.localScale = new Vector3(2.2f, 2.2f, 1f);
+            }
+        }
+
+        // --- 3. LỚP BỤI CÂY TRÊN MẶT ĐẤT (BUSHES) ---
+        GameObject bushesGroup = new GameObject("Scenery_Bushes");
+        bushesGroup.transform.SetParent(sceneryRoot.transform);
+
+        float[] bushX = new float[] { 5f, 15f, 23.5f, 35.5f, 41.5f, 56f, 70f, 82f, 92f };
+        foreach (float bx in bushX)
+        {
+            if (bushSprite != null)
+            {
+                GameObject b = new GameObject($"Bush_{bx}");
+                b.transform.SetParent(bushesGroup.transform);
+                b.transform.position = new Vector3(bx, -2.15f, 0);
+                SpriteRenderer sr = b.AddComponent<SpriteRenderer>();
+                sr.sprite = bushSprite;
+                sr.sortingLayerName = "Default";
+                sr.sortingOrder = -15;
+                b.transform.localScale = new Vector3(1.6f, 1.6f, 1f);
+            }
+        }
     }
 
     // ========================================================================
@@ -598,6 +742,7 @@ public class MarioWorld1_1Builder
         sr.drawMode = SpriteDrawMode.Tiled;
         sr.size = size;
         sr.sortingLayerName = "Default";
+        sr.sortingOrder = 5;
         if (unlitMat != null) sr.material = unlitMat;
         if (tint.HasValue) sr.color = tint.Value;
 

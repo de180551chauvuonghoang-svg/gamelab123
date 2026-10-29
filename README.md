@@ -1,6 +1,13 @@
-# 🎮 2D Platformer Game - Unity (Lab 1, 2, 3)
+# 🎮 2D Platformer Game - Unity (Tổng hợp Lab 1, 2, 3 & Mario Platformer)
 
-Tài liệu hướng dẫn tổng quan và chi tiết thực hiện bài Lab phát triển Game 2D Platformer bằng Unity Engine.
+> 🌟 **Kho lưu trữ được tổ chức thành các nhánh (Branches) độc lập phục vụ chấm điểm và học tập:**
+>
+> | Nhánh | Nội dung & Mục tiêu | Link xem trên GitHub |
+> |---|---|---|
+> | 🚀 **`lab1`** | **Bài Lab 1:** Player Controller, Rigidbody2D, GroundCheck, Flip, PhysicsMaterial2D, Coin, Hazard, UI cơ bản. | [Xem nhánh `lab1`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab1) |
+> | ⚔️ **`lab2`** | **Bài Lab 2:** Tilemap Grid, Cinemachine Virtual Camera 2D, kẻ địch tuần tra `EnemyPatrol` (Point A - Point B), chìa khóa & cổng `KeyItem`. | [Xem nhánh `lab2`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab2) |
+> | 🎵 **`lab3`** | **Bài Lab 3:** Hệ thống âm thanh `AudioManager` (BGM/SFX Singleton), sàn di chuyển `MovingPlatform`, Scene `MainMenu`, chuyển cảnh `SceneManager`. | [Xem nhánh `lab3`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab3) |
+> | ⭐ **`main`** | **Phiên bản hoàn thiện tổng hợp (Unified Version):** Kết hợp trọn vẹn cả 3 bài Lab 1 + 2 + 3, nâng cấp toàn diện cơ chế Super Mario Platformer (Dẫm bẹp quái vật Goomba/Koopa, đá mai rùa, khối hỏi chấm [?], nâng cấp Super/Fire/Starman, ống chui Warp Pipe, Cột cờ Flagpole kết thúc màn, Parallax mây đồi núi sống động). | [Xem nhánh `main`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/main) |
 
 ---
 

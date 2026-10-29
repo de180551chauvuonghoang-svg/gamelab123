@@ -1,11 +1,11 @@
-# 🎮 2D Platformer Game - Unity (Nhánh: `lab2`)
+# 🎮 2D Platformer Game - Unity (Nhánh: `lab1`)
 
-> **Nhánh `lab2`**: Tập trung vào nội dung của **Bài Lab 2** (Thiết kế Tilemap Grid, Cinemachine Virtual Camera 2D, kẻ địch tuần tra EnemyPatrol với Point A / Point B, chướng ngại vật & bẫy Spikes/Hazard, cơ chế nhặt chìa khóa KeyItem mở cổng).
+> **Nhánh `lab1`**: Tập trung vào nội dung cơ bản cốt lõi của **Bài Lab 1** (Player Controller, Vật lý Rigidbody2D, kiểm tra chạm đất GroundCheck, chống nhảy 2 lần, lật hướng mặt Flip, PhysicsMaterial2D không ma sát, nhặt Coin tăng điểm, va chạm Hazard bẫy gai kích hoạt Game Over).
 >
 > 📌 Các nhánh khác trong repository:
 > - [`main`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/main): Phiên bản hoàn thiện Super Mario Platformer cao cấp (Stomp, Power-up, Warp Pipe, Parallax Background).
 > - [`lab3`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab3): Bài Lab 3 (AudioManager Singleton, MainMenu scene, MovingPlatform, Build game).
-> - [`lab1`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab1): Bài Lab 1 cơ bản (Player Controller, Vật lý, Coin, Hazard, GameManager).
+> - [`lab2`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab2): Bài Lab 2 (Tilemap, Patrol Enemy, MovingPlatform, Cinemachine).
 
 ---
 

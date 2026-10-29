@@ -1,6 +1,11 @@
-# 🎮 2D Platformer Game - Unity (Lab 1, 2, 3)
+# 🎮 2D Platformer Game - Unity (Nhánh: `lab3`)
 
-Tài liệu hướng dẫn tổng quan và chi tiết thực hiện bài Lab phát triển Game 2D Platformer bằng Unity Engine.
+> **Nhánh `lab3`**: Bao gồm toàn bộ tính năng của **Lab 1, Lab 2 và Lab 3** (Hệ thống AudioManager Singleton BGM/SFX, MovingPlatform, MainMenu scene, chuyển cảnh SceneManager, giao diện UI Settings).
+>
+> 📌 Các nhánh khác trong repository:
+> - [`main`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/main): Phiên bản hoàn thiện Super Mario Platformer cao cấp (Stomp, Power-up, Warp Pipe, Parallax Background).
+> - [`lab2`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab2): Bài Lab 2 (Tilemap, Patrol Enemy, MovingPlatform, Cinemachine).
+> - [`lab1`](https://github.com/de180551chauvuonghoang-svg/gamelab123/tree/lab1): Bài Lab 1 cơ bản (Player Controller, Vật lý, Coin, Hazard, GameManager).
 
 ---
 

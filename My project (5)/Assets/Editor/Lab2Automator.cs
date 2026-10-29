@@ -568,7 +568,11 @@ public class Lab2Automator
                 tmGo.layer = groundLayerIndex;
 
                 var tmCol = tmGo.AddComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+#if UNITY_2023_1_OR_NEWER
+                tmCol.compositeOperation = Collider2D.CompositeOperation.Merge;
+#else
                 tmCol.usedByComposite = true;
+#endif
                 var compCol = tmGo.AddComponent<CompositeCollider2D>();
                 compCol.geometryType = CompositeCollider2D.GeometryType.Polygons;
                 var rb = tmGo.GetComponent<Rigidbody2D>();

@@ -53,6 +53,13 @@ public class MetroidvaniaQuestManager : MonoBehaviour
 
     private void Awake()
     {
+        // Nếu trong Scene có Mario_World_1_1 hoặc MarioGameManager, tự động tắt QuestManager để không đè giao diện
+        if (GameObject.Find("Mario_World_1_1") != null || FindFirstObjectByType<MarioGameManager>() != null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         if (instance == null)
         {
             instance = this;

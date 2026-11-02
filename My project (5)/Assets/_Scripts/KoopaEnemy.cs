@@ -143,11 +143,13 @@ public class KoopaEnemy : MonoBehaviour
         // 3. Mai rùa đang trượt đâm vào quái khác -> TIÊU DIỆT KẺ ĐỊCH!
         if (isSliding)
         {
+            Vector3 hitPos = collision.contacts.Length > 0 ? (Vector3)collision.contacts[0].point : transform.position;
             GoombaEnemy goomba = collision.gameObject.GetComponentInParent<GoombaEnemy>();
             if (goomba != null)
             {
                 goomba.Stomp();
-                if (GameManager.instance != null) GameManager.instance.AddScore(200);
+                if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(200, hitPos);
+                else if (GameManager.instance != null) GameManager.instance.AddScore(200);
                 return;
             }
 
@@ -155,7 +157,8 @@ public class KoopaEnemy : MonoBehaviour
             if (patrol != null)
             {
                 patrol.StompKill();
-                if (GameManager.instance != null) GameManager.instance.AddScore(200);
+                if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(200, hitPos);
+                else if (GameManager.instance != null) GameManager.instance.AddScore(200);
                 return;
             }
 
@@ -163,7 +166,8 @@ public class KoopaEnemy : MonoBehaviour
             if (otherKoopa != null && otherKoopa != this)
             {
                 otherKoopa.DefeatByFireball();
-                if (GameManager.instance != null) GameManager.instance.AddScore(200);
+                if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(200, hitPos);
+                else if (GameManager.instance != null) GameManager.instance.AddScore(200);
             }
         }
     }
@@ -178,7 +182,9 @@ public class KoopaEnemy : MonoBehaviour
             sr.sprite = shellSprite;
         }
 
-        if (GameManager.instance != null) GameManager.instance.AddScore(100);
+        // Dẫm thụt mai: +100 điểm
+        if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(100, transform.position);
+        else if (GameManager.instance != null) GameManager.instance.AddScore(100);
 
         if (ParticleSpawner.instance != null)
         {
@@ -191,7 +197,9 @@ public class KoopaEnemy : MonoBehaviour
         isSliding = true;
         direction = Mathf.Sign(kickDirection);
 
-        if (GameManager.instance != null) GameManager.instance.AddScore(400);
+        // Đá mai rùa: +400 điểm
+        if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(400, transform.position);
+        else if (GameManager.instance != null) GameManager.instance.AddScore(400);
 
         if (ParticleSpawner.instance != null)
         {
@@ -201,7 +209,9 @@ public class KoopaEnemy : MonoBehaviour
 
     public void DefeatByFireball()
     {
-        if (GameManager.instance != null) GameManager.instance.AddScore(200);
+        // Tiêu diệt bằng lửa: +200 điểm
+        if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(200, transform.position);
+        else if (GameManager.instance != null) GameManager.instance.AddScore(200);
 
         if (ParticleSpawner.instance != null)
         {

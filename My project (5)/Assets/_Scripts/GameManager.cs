@@ -104,15 +104,20 @@ public class GameManager : MonoBehaviour
         if (winPanel != null) winPanel.SetActive(false);
     }
 
-    // ========================================================================
-    // ĐIỂM SỐ
-    // ========================================================================
+    public int CurrentScore => score;
+
     public void AddScore(int amount)
     {
         if (isGameEnded) return;
 
         score += amount;
         UpdateScoreUI();
+
+        // Đồng bộ điểm sang MarioGameManager nếu đang chơi chế độ Mario
+        if (MarioGameManager.instance != null && MarioGameManager.instance.score != score)
+        {
+            MarioGameManager.instance.SyncScore(score);
+        }
 
         // Cập nhật High Score real-time
         if (score > highScore)
@@ -134,6 +139,9 @@ public class GameManager : MonoBehaviour
         comboCount++;
         int multipliedScore = baseReward * comboCount;
         AddScore(multipliedScore);
+
+        // Hiển thị số điểm popup bay lên tại vị trí quái chết (+100, +200,...)
+        MarioGameManager.ShowFloatingScore(stompPosition, multipliedScore);
 
         // Hiệu ứng particle combo
         if (comboCount >= 2)

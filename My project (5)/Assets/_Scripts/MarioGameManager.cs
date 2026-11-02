@@ -1,17 +1,19 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 /// <summary>
-/// Quản lý giao diện HUD và đếm ngược thời gian chuẩn Super Mario Bros:
-/// MARIO      WORLD      TIME
-/// 000250      1-1        372
-/// COINS: x04             LIVES: x3
+/// Quản lý giao diện HUD, tính điểm (Score), nhặt xu (Coins), mạng (Lives) và đếm ngược thời gian chuẩn Super Mario Bros:
+/// MARIO       COIN       WORLD       TIME       LIVES
+/// 000250      x04         1-1         372        x3
 /// </summary>
 public class MarioGameManager : MonoBehaviour
 {
     public static MarioGameManager instance;
 
     [Header("--- THÔNG SỐ MARIO ---")]
+    public int score = 0;
     public int coins = 0;
     public int lives = 3;
     public float timeRemaining = 400f;
@@ -33,7 +35,17 @@ public class MarioGameManager : MonoBehaviour
 
     private void Start()
     {
+        // Ẩn các UI của các chế độ khác (Metroidvania/Lab cũ) nếu còn sót
+        CleanupLegacyUI();
+
         EnsureUI();
+
+        // Đồng bộ điểm ban đầu từ GameManager nếu có
+        if (GameManager.instance != null)
+        {
+            score = GameManager.instance.CurrentScore;
+        }
+
         UpdateAllMarioUI();
     }
 
@@ -50,7 +62,6 @@ public class MarioGameManager : MonoBehaviour
             if (timeRemaining <= 0)
             {
                 isTimerRunning = false;
-                // Hết giờ -> Mất mạng
                 if (GameManager.instance != null)
                 {
                     GameManager.instance.GameOver();
@@ -59,18 +70,58 @@ public class MarioGameManager : MonoBehaviour
         }
     }
 
-    public void AddCoin(int amount = 1)
+    /// <summary>
+    /// Cộng điểm khi giết quái, đập khối gạch hoặc nhặt xu
+    /// </summary>
+    public void AddScore(int amount, Vector3? worldPos = null)
+    {
+        score += amount;
+
+        // Đồng bộ ngược sang GameManager
+        if (GameManager.instance != null && GameManager.instance.CurrentScore != score)
+        {
+            GameManager.instance.AddScore(amount);
+        }
+
+        // Hiển thị chữ số điểm bay lên tại vị trí quái chết hoặc ăn coin
+        if (worldPos.HasValue)
+        {
+            ShowFloatingScore(worldPos.Value, amount);
+        }
+
+        UpdateAllMarioUI();
+    }
+
+    /// <summary>
+    /// Đồng bộ điểm số từ GameManager sang Mario HUD
+    /// </summary>
+    public void SyncScore(int newScore)
+    {
+        score = newScore;
+        UpdateAllMarioUI();
+    }
+
+    /// <summary>
+    /// Nhặt coin: Tăng số coin, cộng 200 điểm chuẩn Mario, đủ 100 coin tặng 1 mạng
+    /// </summary>
+    public void AddCoin(int amount = 1, Vector3? worldPos = null)
     {
         coins += amount;
+        
+        // Mỗi coin tặng 200 điểm
+        AddScore(amount * 200, worldPos);
+
+        // Đủ 100 coin tặng thêm 1 mạng (1-Up)
         if (coins >= 100)
         {
             coins -= 100;
             lives++;
             if (ParticleSpawner.instance != null)
             {
-                ParticleSpawner.instance.SpawnDust(transform.position, 20, Color.green);
+                ParticleSpawner.instance.SpawnDust(transform.position, 25, Color.green);
             }
         }
+
         UpdateAllMarioUI();
     }
 
@@ -78,7 +129,6 @@ public class MarioGameManager : MonoBehaviour
     {
         EnsureUI();
 
-        int score = GameManager.instance != null ? GetGameManagerScore() : 0;
         if (marioScoreText != null) marioScoreText.text = $"MARIO\n{score:D6}";
         if (coinsText != null) coinsText.text = $"COIN\nx{coins:D2}";
         if (worldText != null) worldText.text = $"WORLD\n{worldName}";
@@ -86,16 +136,45 @@ public class MarioGameManager : MonoBehaviour
         if (livesText != null) livesText.text = $"LIVES\nx{lives}";
     }
 
-    private int GetGameManagerScore()
+    private void CleanupLegacyUI()
     {
-        // GameManager có score field
-        return 0; // Tự động sync qua Event hoặc GameManager
+        // Tắt QuestManager Metroidvania nếu đang chạy
+        GameObject questMgr = GameObject.Find("QuestManager");
+        if (questMgr != null) questMgr.SetActive(false);
+
+        // Tắt các text thừa của Metroidvania
+        GameObject gemsText = GameObject.Find("GemsHUDText");
+        if (gemsText != null) gemsText.SetActive(false);
+
+        GameObject zoneBanner = GameObject.Find("ZoneBannerText");
+        if (zoneBanner != null) zoneBanner.SetActive(false);
+
+        GameObject loreHint = GameObject.Find("LoreHintText");
+        if (loreHint != null) loreHint.SetActive(false);
+
+        // Tắt ScoreText cũ của Lab 2
+        GameObject oldScore = GameObject.Find("ScoreText");
+        if (oldScore != null) oldScore.SetActive(false);
     }
 
     private void EnsureUI()
     {
         Canvas canvas = FindFirstObjectByType<Canvas>();
-        if (canvas == null) return;
+        if (canvas == null)
+        {
+            GameObject canvasGo = new GameObject("MarioCanvas");
+            canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasGo.AddComponent<CanvasScaler>();
+            canvasGo.AddComponent<GraphicRaycaster>();
+        }
+
+        // Đảm bảo CanvasScaler hỗ trợ co giãn chuẩn theo màn hình (1920x1080)
+        CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+        if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
 
         Transform hudGroup = canvas.transform.Find("Mario_HUD");
         if (hudGroup == null)
@@ -105,37 +184,106 @@ public class MarioGameManager : MonoBehaviour
             hudGroup = hudGo.transform;
 
             RectTransform rt = hudGo.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = new Vector2(0, -20);
-            rt.sizeDelta = new Vector2(0, 60);
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -15f);
+            rt.sizeDelta = new Vector2(0f, 70f);
 
-            // 5 cột: MARIO, COIN, WORLD, TIME, LIVES
-            marioScoreText = CreateHUDColumn(hudGroup, "ScoreText", new Vector2(-450, 0), "MARIO\n000000");
-            coinsText = CreateHUDColumn(hudGroup, "CoinText", new Vector2(-220, 0), "COIN\nx00");
-            worldText = CreateHUDColumn(hudGroup, "WorldText", new Vector2(0, 0), "WORLD\n1-1");
-            timeText = CreateHUDColumn(hudGroup, "TimeText", new Vector2(220, 0), "TIME\n400");
-            livesText = CreateHUDColumn(hudGroup, "LivesText", new Vector2(450, 0), "LIVES\nx3");
+            // 5 cột cách đều chuẩn tỉ lệ trên Canvas 1920px:
+            // MARIO (-600), COIN (-300), WORLD (0), TIME (+300), LIVES (+600)
+            marioScoreText = CreateHUDColumn(hudGroup, "ScoreText", new Vector2(-600, 0), $"MARIO\n{score:D6}");
+            coinsText = CreateHUDColumn(hudGroup, "CoinText", new Vector2(-300, 0), $"COIN\nx{coins:D2}");
+            worldText = CreateHUDColumn(hudGroup, "WorldText", new Vector2(0, 0), $"WORLD\n{worldName}");
+            timeText = CreateHUDColumn(hudGroup, "TimeText", new Vector2(300, 0), $"TIME\n{(int)timeRemaining}");
+            livesText = CreateHUDColumn(hudGroup, "LivesText", new Vector2(600, 0), $"LIVES\nx{lives}");
         }
     }
 
     private TextMeshProUGUI CreateHUDColumn(Transform parent, string name, Vector2 pos, string defaultText)
     {
+        Transform existing = parent.Find(name);
+        if (existing != null)
+        {
+            return existing.GetComponent<TextMeshProUGUI>();
+        }
+
         GameObject col = new GameObject(name);
         col.transform.SetParent(parent, false);
 
         TextMeshProUGUI tmp = col.AddComponent<TextMeshProUGUI>();
         tmp.text = defaultText;
-        tmp.fontSize = 24;
+        tmp.fontSize = 28;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = new Color(1f, 0.95f, 0.4f, 1f); // Vàng Mario sáng đẹp
 
         RectTransform rt = col.GetComponent<RectTransform>();
         rt.anchoredPosition = pos;
-        rt.sizeDelta = new Vector2(180, 50);
+        rt.sizeDelta = new Vector2(250, 60);
 
         return tmp;
+    }
+
+    // ========================================================================
+    // HIỆU ỨNG POPUP ĐIỂM SỐ BAY LÊN (+100, +200, +400, +800)
+    // ========================================================================
+    /// <summary>
+    /// Tạo chữ điểm bay lên tại vị trí thế giới (world space) rồi tan biến
+    /// </summary>
+    public static void ShowFloatingScore(Vector3 worldPos, int points)
+    {
+        if (points <= 0) return;
+
+        GameObject popup = new GameObject("ScorePopup_" + points);
+        popup.transform.position = worldPos + Vector3.up * 0.3f;
+
+        TextMeshPro tm = popup.AddComponent<TextMeshPro>();
+        tm.text = $"+{points}";
+        tm.fontSize = 6;
+        tm.fontStyle = FontStyles.Bold;
+        tm.alignment = TextAlignmentOptions.Center;
+        tm.color = new Color(1f, 0.9f, 0.2f, 1f); // Màu vàng rực rỡ
+        tm.sortingOrder = 20;
+
+        if (instance != null)
+        {
+            instance.StartCoroutine(AnimateScorePopup(popup, tm));
+        }
+        else
+        {
+            Destroy(popup, 0.6f);
+        }
+    }
+
+    private static IEnumerator AnimateScorePopup(GameObject popup, TextMeshPro tm)
+    {
+        float duration = 0.6f;
+        float elapsed = 0f;
+        Vector3 startPos = popup.transform.position;
+        Vector3 targetPos = startPos + Vector3.up * 1.3f;
+        Color initialColor = tm.color;
+
+        while (elapsed < duration)
+        {
+            if (popup == null) yield break;
+
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            // Di chuyển lên cao dần
+            popup.transform.position = Vector3.Lerp(startPos, targetPos, Mathf.SmoothStep(0, 1, t));
+
+            // Mờ dần về cuối
+            float alpha = Mathf.Lerp(1f, 0f, t * t);
+            tm.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+
+            yield return null;
+        }
+
+        if (popup != null)
+        {
+            Destroy(popup);
+        }
     }
 }

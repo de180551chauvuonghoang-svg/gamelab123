@@ -8,7 +8,7 @@ public class Coin : MonoBehaviour
 {
     [Header("--- THIẾT LẬP ---")]
     [Tooltip("Số điểm cộng khi nhặt coin")]
-    public int scoreValue = 1;
+    public int scoreValue = 200;
 
     [Tooltip("Tốc độ tự xoay nhẹ")]
     public float rotateSpeed = 100f;
@@ -66,8 +66,12 @@ public class Coin : MonoBehaviour
                 AudioManager.instance.PlayCoinSFX();
             }
 
-            // Cộng điểm
-            if (GameManager.instance != null)
+            // Cộng điểm và coin (200 điểm + 1 xu)
+            if (MarioGameManager.instance != null)
+            {
+                MarioGameManager.instance.AddCoin(1, transform.position);
+            }
+            else if (GameManager.instance != null)
             {
                 GameManager.instance.AddScore(scoreValue);
             }

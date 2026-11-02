@@ -85,7 +85,9 @@ public class GoombaEnemy : MonoBehaviour
         // Co bẹp sprite Goomba chuẩn Mario
         transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * 0.3f, 1f);
 
-        if (GameManager.instance != null) GameManager.instance.AddScore(100);
+        // Cộng 100 điểm khi dẫm bẹp Goomba
+        if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(100, transform.position);
+        else if (GameManager.instance != null) GameManager.instance.AddScore(100);
 
         if (ParticleSpawner.instance != null)
         {
@@ -100,7 +102,9 @@ public class GoombaEnemy : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        if (GameManager.instance != null) GameManager.instance.AddScore(200);
+        // Cộng 200 điểm khi tiêu diệt bằng sao bất tử
+        if (MarioGameManager.instance != null) MarioGameManager.instance.AddScore(200, transform.position);
+        else if (GameManager.instance != null) GameManager.instance.AddScore(200);
 
         if (ParticleSpawner.instance != null)
         {

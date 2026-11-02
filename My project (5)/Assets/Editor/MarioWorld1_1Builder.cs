@@ -211,7 +211,7 @@ public class MarioWorld1_1Builder
             "Gem_Sapphire", "Gem_Ruby", "Gem_Emerald", "Ruby_Altar", "Sapphire_Altar", "Relic_Altar_DJ", "Relic_Altar_Dash",
             "Relic_AirDash", "Key_WinItem", "Cavern_Ceiling", "Cavern_Floor_1", "Cavern_Floor_2", "Temple_Plaza", "Shaft_LeftWall",
             "Shaft_RightWall", "MovingPlatform", "Moving_Platform_Group", "Zone1_WhisperingPlains", "Zone2_CrystalCavern",
-            "LeftBoundaryWall", "Ground", "Coin"
+            "LeftBoundaryWall", "Ground", "Coin", "QuestManager", "GemsHUDText", "ZoneBannerText", "LoreHintText", "UnlockPopupPanel"
         };
 
         GameObject backup = GameObject.Find("Old_Lab_Environment_Backup");
@@ -250,6 +250,14 @@ public class MarioWorld1_1Builder
         {
             scoreText.SetActive(false);
         }
+
+        // Tắt QuestManager và các UI Metroidvania cũ
+        GameObject questMgr = GameObject.Find("QuestManager");
+        if (questMgr != null) questMgr.SetActive(false);
+        GameObject gemsText = GameObject.Find("GemsHUDText");
+        if (gemsText != null) gemsText.SetActive(false);
+        GameObject zoneBanner = GameObject.Find("ZoneBannerText");
+        if (zoneBanner != null) zoneBanner.SetActive(false);
 
         // Tắt toàn bộ môi trường cũ để không che hay va chạm với Mario
         backup.SetActive(false);

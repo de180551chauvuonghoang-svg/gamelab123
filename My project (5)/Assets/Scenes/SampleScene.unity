@@ -23513,6 +23513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b19602630bd05f49a5e7bd8f8c68b00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MarioGameManager
+  score: 0
   coins: 0
   lives: 3
   timeRemaining: 400

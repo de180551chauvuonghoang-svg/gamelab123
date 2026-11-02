@@ -179,36 +179,39 @@ public class MarioGameManager : MonoBehaviour
         Transform hudGroup = canvas.transform.Find("Mario_HUD");
         if (hudGroup == null)
         {
-            GameObject hudGo = new GameObject("Mario_HUD");
+            GameObject hudGo = new GameObject("Mario_HUD", typeof(RectTransform));
             hudGo.transform.SetParent(canvas.transform, false);
             hudGroup = hudGo.transform;
 
-            RectTransform rt = hudGo.AddComponent<RectTransform>();
+            RectTransform rt = (RectTransform)hudGo.transform;
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = new Vector2(0f, -15f);
             rt.sizeDelta = new Vector2(0f, 70f);
+        }
 
-            // 5 cột cách đều chuẩn tỉ lệ trên Canvas 1920px:
-            // MARIO (-600), COIN (-300), WORLD (0), TIME (+300), LIVES (+600)
-            marioScoreText = CreateHUDColumn(hudGroup, "ScoreText", new Vector2(-600, 0), $"MARIO\n{score:D6}");
-            coinsText = CreateHUDColumn(hudGroup, "CoinText", new Vector2(-300, 0), $"COIN\nx{coins:D2}");
-            worldText = CreateHUDColumn(hudGroup, "WorldText", new Vector2(0, 0), $"WORLD\n{worldName}");
-            timeText = CreateHUDColumn(hudGroup, "TimeText", new Vector2(300, 0), $"TIME\n{(int)timeRemaining}");
-            livesText = CreateHUDColumn(hudGroup, "LivesText", new Vector2(600, 0), $"LIVES\nx{lives}");
+        if (hudGroup != null)
+        {
+            if (marioScoreText == null) marioScoreText = CreateHUDColumn(hudGroup, "ScoreText", new Vector2(-600, 0), $"MARIO\n{score:D6}");
+            if (coinsText == null) coinsText = CreateHUDColumn(hudGroup, "CoinText", new Vector2(-300, 0), $"COIN\nx{coins:D2}");
+            if (worldText == null) worldText = CreateHUDColumn(hudGroup, "WorldText", new Vector2(0, 0), $"WORLD\n{worldName}");
+            if (timeText == null) timeText = CreateHUDColumn(hudGroup, "TimeText", new Vector2(300, 0), $"TIME\n{(int)timeRemaining}");
+            if (livesText == null) livesText = CreateHUDColumn(hudGroup, "LivesText", new Vector2(600, 0), $"LIVES\nx{lives}");
         }
     }
 
     private TextMeshProUGUI CreateHUDColumn(Transform parent, string name, Vector2 pos, string defaultText)
     {
+        if (parent == null) return null;
+
         Transform existing = parent.Find(name);
         if (existing != null)
         {
             return existing.GetComponent<TextMeshProUGUI>();
         }
 
-        GameObject col = new GameObject(name);
+        GameObject col = new GameObject(name, typeof(RectTransform));
         col.transform.SetParent(parent, false);
 
         TextMeshProUGUI tmp = col.AddComponent<TextMeshProUGUI>();
@@ -218,7 +221,7 @@ public class MarioGameManager : MonoBehaviour
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = new Color(1f, 0.95f, 0.4f, 1f); // Vàng Mario sáng đẹp
 
-        RectTransform rt = col.GetComponent<RectTransform>();
+        RectTransform rt = (RectTransform)col.transform;
         rt.anchoredPosition = pos;
         rt.sizeDelta = new Vector2(250, 60);
 
@@ -235,7 +238,7 @@ public class MarioGameManager : MonoBehaviour
     {
         if (points <= 0) return;
 
-        GameObject popup = new GameObject("ScorePopup_" + points);
+        GameObject popup = new GameObject("ScorePopup_" + points, typeof(RectTransform));
         popup.transform.position = worldPos + Vector3.up * 0.3f;
 
         TextMeshPro tm = popup.AddComponent<TextMeshPro>();
@@ -260,13 +263,15 @@ public class MarioGameManager : MonoBehaviour
     {
         float duration = 0.6f;
         float elapsed = 0f;
+        if (popup == null || tm == null) yield break;
+
         Vector3 startPos = popup.transform.position;
         Vector3 targetPos = startPos + Vector3.up * 1.3f;
         Color initialColor = tm.color;
 
         while (elapsed < duration)
         {
-            if (popup == null) yield break;
+            if (popup == null || tm == null) yield break;
 
             elapsed += Time.deltaTime;
             float t = elapsed / duration;

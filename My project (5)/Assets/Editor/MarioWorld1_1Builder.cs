@@ -382,6 +382,7 @@ public class MarioWorld1_1Builder
             PlayerController pc = player.GetComponent<PlayerController>();
             if (pc != null)
             {
+                pc.jumpForce = 13.5f; // Lực nhảy cao hơn, vượt qua các ống nước cao và khối hỏi chấm
                 pc.canDoubleJump = false; // Mario chuẩn không nhảy kép
                 pc.canAirDash = false;
             }

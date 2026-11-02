@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour
     // ========================================================================
     [Header("--- NHẢY ---")]
     [Tooltip("Lực nhảy")]
-    public float jumpForce = 11.5f;
+    public float jumpForce = 13.5f;
 
     [Tooltip("Coyote Time: Thời gian vẫn cho nhảy sau khi rời mặt đất (giây)")]
     public float coyoteTimeDuration = 0.12f;
@@ -184,6 +184,12 @@ public class PlayerController : MonoBehaviour
         if (rb != null)
         {
             rb.gravityScale = baseGravityScale;
+        }
+
+        // Tự động đảm bảo lực nhảy cao vừa vặn cho Mario (vượt ống cống và khối hỏi chấm)
+        if (jumpForce < 12f)
+        {
+            jumpForce = 13.5f;
         }
 
         // Căn chỉnh lại BoxCollider2D vừa khít bàn chân
